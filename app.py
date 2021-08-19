@@ -10,6 +10,7 @@ import sqlite3
 import config1
 import parsing as par
 import functions as func
+import texts
 
 available_work_buttons = ["узнать баланс", "остаток до бонуса", "выйти из аккаунта"]
 available_admin_buttons = ["список моделей", "удалить модель", "выйти из аккаунта"]
@@ -37,18 +38,14 @@ async def bot_start(message: types.Message):
     conn.close()
 
     if result: #если есть в бд
-        Name = result[0]
+        #Name = result[0]
         markup = types.ReplyKeyboardMarkup(resize_keyboard = True)
         for name in available_work_buttons:
             markup.add(name) 
         await message.answer("Сессия восстановлена.", reply_markup=markup)  
-        await OrderDeals.waiting_for_modeldeals.set()
+        await OrderDeals.waiting_for_modeldeals.set() 
     else: # если нет в бд
-        await message.answer(
-        "Привет! Это бот модельного агенства. Введи Id для продолжения работы. \
-         Для дополнительной информации воспользуйтесь справкой (/help).",
-        reply_markup=types.ReplyKeyboardRemove()
-    )
+        await message.answer(texts.Hello, reply_markup=types.ReplyKeyboardRemove())
         await OrderDeals.waiting_for_ID.set()
 
 async def identification(message: types.Message, state: FSMContext):
@@ -111,15 +108,13 @@ async def model_deals(message: types.Message, state: FSMContext):
             await message.answer("Пожалуйста, выберите команду, используя клавиатуру ниже.")
             return
         
-        await state.update_data(chosen_food=message.text.lower())  
+        #await state.update_data(chosen_food=message.text.lower())  
 
         if message.text.lower() == available_work_buttons[0]:
             Balance = func.Sum_for_week(result, Name)
-            print(Name)
-            print(Balance)
             await message.answer(Balance)
-            #await OrderDeals.waiting_for_modeldeals.set()
-            return
+            await OrderDeals.waiting_for_modeldeals.set()
+            #return
 
         elif message.text.lower() == available_work_buttons[1]:
             await message.answer(text= "Bonus")
@@ -142,10 +137,42 @@ async def model_deals(message: types.Message, state: FSMContext):
         await message.answer(message.chat.id, 'Somthing gone wrong. Try again.')
 
 async def admin_deals(message: types.Message, state: FSMContext):
-    pass
+    if message.text.lower() == available_admin_buttons[0]:
+        await message.answer("Список зарегестрированных моделей:") 
+
+        conn = sqlite3.connect("database.db")
+        cursor = conn.cursor()
+        cursor.execute("SELECT name FROM logins")
+        result = cursor.fetchone()
+        conn.close()
+
+        if result != None:
+            await message.answer(result)
+            await OrderDeals.waiting_for_admindeals.set()
+        else:
+            await message.answer('Нет зарегестрированных моделей') #start / stop spam
+            await OrderDeals.waiting_for_admindeals.set()
+    elif message.text.lower() == available_admin_buttons[1]:
+        pass
+    elif message.text.lower() == available_admin_buttons[2]:
+        await message.answer("Введите свой ID")
+        await OrderDeals.waiting_for_ID.set()
+
+async def bot_help(message: types.Message, state: FSMContext):
+    #await state.finish()
+    await message.answer(texts.Help)
+
+async def bonus_syst(message: types.Message, state: FSMContext):
+    await message.answer(texts.Bonus_table)
+
+async def mailing(message: types.Message, state: FSMContext):
+    await message.answer("Раздел находится в разработке")
 
 def register_handlers_deals(dp: Dispatcher):
     dp.register_message_handler(bot_start, commands="start", state="*")
+    dp.register_message_handler(bot_help, commands="help", state="*")
+    dp.register_message_handler(bonus_syst, commands="bonussyst", state="*")
+    dp.register_message_handler(mailing, commands="mailing", state="*")
     dp.register_message_handler(identification, state=OrderDeals.waiting_for_ID)
     dp.register_message_handler(model_deals, state=OrderDeals.waiting_for_modeldeals)
     dp.register_message_handler(admin_deals, state=OrderDeals.waiting_for_admindeals)
