@@ -26,7 +26,7 @@ def timed_lru_cache(seconds: int, maxsize: int = 128):
 @timed_lru_cache(60) #копирнул с инета, особо в ней не разбирался
 
 def parsing_ID():
-    gc = gspread.service_account(filename = "/home/pi/Desktop/Python/WebCamBot_1.1/WebCamBotAiogram/webcambot-ad6a9a73eef6.json") ####C:/Users/User/Desktop/Bot/WebCamBot_1.1/WebCamBot/webcambot-ad6a9a73eef6.json  ####/home/pi/Desktop/Python/WebCamBot_1.1/WebCamBotAiogram/
+    gc = gspread.service_account(filename = "C:/Users/User/Desktop/Bot/WebCamBot_1.1/WebCamBotAiogram/webcambot-ad6a9a73eef6.json") ####C:/Users/User/Desktop/Bot/WebCamBot_1.1/WebCamBot/webcambot-ad6a9a73eef6.json  ####/home/pi/Desktop/Python/WebCamBot_1.1/WebCamBotAiogram/
     sh = gc.open('WebCamBot') ##документ на гугл драйве c айдишниками
     worksheet = sh.sheet1
     result = worksheet.get_all_records() # массив после парсинга документа
@@ -34,7 +34,7 @@ def parsing_ID():
 
 @timed_lru_cache(60)
 def parsing_DOC(): # нужно потестить, вероятно будет сбоить во время внесения изменений, особенно кривых
-    gc = gspread.service_account(filename = "/home/pi/Desktop/Python/WebCamBot_1.1/WebCamBotAiogram/webcambot-ad6a9a73eef6.json") ####C:/Users/User/Desktop/Bot/WebCamBot_1.1/WebCamBot/webcambot-ad6a9a73eef6.json  ####/home/pi/Desktop/Python/WebCamBot/
+    gc = gspread.service_account(filename = "C:/Users/User/Desktop/Bot/WebCamBot_1.1/WebCamBotAiogram/webcambot-ad6a9a73eef6.json") ####C:/Users/User/Desktop/Bot/WebCamBot_1.1/WebCamBot/webcambot-ad6a9a73eef6.json  ####/home/pi/Desktop/Python/WebCamBot/
     sh = gc.open('КД 2020 Загородный') ##документ на гугл драйве с бухгалтерией
     worksheet = sh.sheet1
     result = worksheet.get_all_records() # массив после парсинга документа

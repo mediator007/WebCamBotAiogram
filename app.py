@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from aiogram import Bot, Dispatcher, executor, types
+from aiogram import Bot, Dispatcher, types
 from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
@@ -15,9 +15,9 @@ import texts
 available_work_buttons = ["узнать баланс", "остаток до бонуса", "выйти из аккаунта"]
 available_admin_buttons = ["список моделей", "удалить модель", "выйти из аккаунта"]
 
-conn = sqlite3.connect("database.db") #, check_same_thread = False) # игнор потоков может вызвать коллизию
+conn = sqlite3.connect("database.db")
 cursor = conn.cursor()
-cursor.execute("""CREATE TABLE IF NOT EXISTS logins (chat_id, ID, Name)""") #Вид бд:  [(383314704, 123123, 'Marzia'), (383314704, 123124, 'Emma')]
+cursor.execute("""CREATE TABLE IF NOT EXISTS logins (chat_id, ID, Name)""") 
 conn.commit()
 cursor.execute("SELECT * FROM logins")
 conn.close()
@@ -29,7 +29,6 @@ class OrderDeals(StatesGroup):
     waiting_for_modeldelete = State()
 
 async def bot_start(message: types.Message):
-    #global Name 
     RegistrationNum = message.from_user.id
 
     conn = sqlite3.connect("database.db")
@@ -39,7 +38,6 @@ async def bot_start(message: types.Message):
     conn.close()
 
     if result: #если есть в бд
-        #Name = result[0]
         markup = types.ReplyKeyboardMarkup(resize_keyboard = True)
         for name in available_work_buttons:
             markup.add(name) 
@@ -50,14 +48,13 @@ async def bot_start(message: types.Message):
         await OrderDeals.waiting_for_ID.set()
 
 async def identification(message: types.Message, state: FSMContext):
-    #global Name
     res = par.parsing_ID() 
     try:
         ID = message.text
         if not ID.isdigit():
             await message.answer("Id должен быть числом")
             await OrderDeals.waiting_for_ID.set()
-            return # Я не понимаю нахер он нужен
+            return 
         Num = int(ID)
         search = func.search_id(res,Num) ## Поиск айдишника по массиву
         
@@ -71,8 +68,8 @@ async def identification(message: types.Message, state: FSMContext):
                 await OrderDeals.waiting_for_admindeals.set()
 
             else: ## Если не модель и не админ - повторяем ввод айдишника
-                await message.answer("ID не обнаруже. Попробуйте снова.")
-                await OrderDeals.waiting_for_admindeals.set()
+                await message.answer("ID не обнаружен. Попробуйте снова.")
+                await OrderDeals.waiting_for_ID.set()
         else:
             Name = func.search_name(res, Num)
             RegistrationNum = message.from_user.id
@@ -94,7 +91,7 @@ async def identification(message: types.Message, state: FSMContext):
 async def model_deals(message: types.Message, state: FSMContext):
     res = par.parsing_DOC() # парсинг из кэша
     result = res[-100:] # недельный баланс обычно помещается в последнюю сотню строк выдачи
-    #print(message.text.lower())
+    
     m = message.from_user.id
 
     conn = sqlite3.connect("database.db")
@@ -130,12 +127,19 @@ async def model_deals(message: types.Message, state: FSMContext):
             await message.answer("Введите свой ID")
             await OrderDeals.waiting_for_ID.set()
         
-    except Exception as e:
-        print(e)
-        await message.answer(message.chat.id, 'Somthing gone wrong. Try again.')
+    except TypeError:
+
+        await message.answer('Администратор прекратил вашу сессию.')
+        await message.answer("Введите свой ID")
+        await OrderDeals.waiting_for_ID.set()
+
 
 async def admin_deals(message: types.Message, state: FSMContext):
-    if message.text.lower() == available_admin_buttons[0]:
+    if message.text.lower() not in available_admin_buttons:
+        await message.answer("Пожалуйста, выберите команду, используя клавиатуру ниже.")
+        return
+
+    elif message.text.lower() == available_admin_buttons[0]:
         await message.answer("Список зарегестрированных моделей:") 
 
         conn = sqlite3.connect("database.db")
@@ -148,8 +152,9 @@ async def admin_deals(message: types.Message, state: FSMContext):
             await message.answer(result[0])
             await OrderDeals.waiting_for_admindeals.set()
         else:
-            await message.answer('Нет зарегестрированных моделей') #start / stop spam
+            await message.answer('Нет зарегестрированных моделей') 
             await OrderDeals.waiting_for_admindeals.set()
+
     elif message.text.lower() == available_admin_buttons[1]:
         await message.answer("Введите имя")
         await OrderDeals.waiting_for_modeldelete.set()
@@ -158,42 +163,36 @@ async def admin_deals(message: types.Message, state: FSMContext):
         await message.answer("Введите свой ID")
         await OrderDeals.waiting_for_ID.set()
 
-async def model_delete(message: types.Message, state: FSMContext): ## в разработке
+async def model_delete(message: types.Message, state: FSMContext):
     
     conn = sqlite3.connect("database.db")
     cursor = conn.cursor()
     cursor.execute("SELECT name FROM logins")
     datas = cursor.fetchone()
-    #print(message.text.lower())
-    #print(datas[0].casefold())
-    #conn.close()
-
     if datas != None:
         try:
-            print(1)
             for i in range(len(datas)):
                 if datas[i][0].casefold() == message.text.lower():
-                    print(2)
                     namefordel = datas[i][0]
                     cursor.execute("DELETE FROM logins WHERE Name = ?", (namefordel, ))
                     await message.answer(texts.DeleteModel)
                     break
+                
+                elif datas[0].casefold() == message.text.lower():
+                    namefordel = datas[0]
+                    cursor.execute("DELETE FROM logins WHERE Name = ?", (namefordel, ))
+                    await message.answer(texts.DeleteModel)
+                    break
         except TypeError:
-            print(3)
-            if datas[0].casefold() == message.text.lower():
-                print(4)
-                namefordel = datas[0]
-                cursor.execute("DELETE FROM logins WHERE Name = ?", (namefordel, ))
-                await message.answer(texts.DeleteModel)
+            pass
     else:
-        await message.answer("Нет зарегестрированных моделей")
+        await message.answer("Такое имя отсутствует")
     
     conn.commit()
     conn.close()
     await OrderDeals.waiting_for_admindeals.set()
 
 async def bot_help(message: types.Message, state: FSMContext):
-    #await state.finish()
     await message.answer(texts.Help)
 
 async def bonus_syst(message: types.Message, state: FSMContext):
@@ -238,9 +237,6 @@ async def main():
     logger.error("Starting bot")
     bot = Bot(token=config1.token)
     dp = Dispatcher(bot, storage=MemoryStorage())
-    # Регистрация хэндлеров
-    #register_handlers_common(dp)
-    #register_handlers_drinks(dp)
     register_handlers_deals(dp)
     await set_commands_model(bot)
     await dp.start_polling()

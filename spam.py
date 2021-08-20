@@ -3,14 +3,11 @@ import time
 import functions as func
 import telebot
 import config1
-import gspread
 import schedule
 import parsing as par
 
 
 WebCamBot = telebot.TeleBot(config1.token)
-
-c = 1 # сумма необходимая для бонуса. Пока для примера 50
 
 bonus_table = {
     300:51, 350:52, 400:53, 450:54, 500:55,\
@@ -32,22 +29,20 @@ def spam():
         try:
             for i in range(len(datas)):
                 Balance = func.Sum_for_week(result1, datas[i][2]) # если в бд зарегано несколько моделей
-                print(Balance)
-                if Balance >= c:
-                    WebCamBot.send_message(datas[i][0], text = "Your balance is more then c. Take a shift on this week for bonus")
+                if Balance >= vars.c:
+                    WebCamBot.send_message(datas[i][0], text = f"До бонуса 60% осталось всего {750 - Balance}$. Возможно стоит взять еще одну смену!")
 
         except TypeError:
             Balance = func.Sum_for_week(result1, datas[2]) # если в бд зарегана 1 модель
             print(datas[2])
             print(Balance)
-            if Balance >= c:
-                    WebCamBot.send_message(datas[0], text = "Your balance is more then c. Take a shift on this week for bonus")
+            if Balance >= vars.c:
+                    WebCamBot.send_message(datas[0], text = f"До бонуса 60% осталось всего {750 - Balance}$. Возможно стоит взять еще одну смену!")
     else:
         pass
 
 while True:
-    #schedule.every(30).seconds.do(spam)
     schedule.every().day.at("12:00").do(spam)
-    schedule.run_pending() # не понял нах это нужно
+    schedule.run_pending() 
     time.sleep(30) 
 

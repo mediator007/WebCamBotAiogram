@@ -1,5 +1,6 @@
 import datetime
 import time
+import vars
 
 def search_id(massiv, id):  ###поиск айдишника В ДОКУМЕНТЕ РЕГИСТРАЦИИ
     for i in range(len(massiv)):  
@@ -20,7 +21,7 @@ def search_name(massiv, id):  ###поиск имени В ДОКУМЕНТЕ Р�
     return Name
 
 def admin_search(admin_id):  ### проверка админского айдишника
-    if admin_id == 777: 
+    if admin_id == vars.admin_pass: 
         admin_search = True
     else:
         admin_search = False
