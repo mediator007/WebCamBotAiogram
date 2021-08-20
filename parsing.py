@@ -1,6 +1,8 @@
 from functools import lru_cache, wraps
 from datetime import datetime, timedelta
 import gspread
+import schedule
+import time
 
 
 def timed_lru_cache(seconds: int, maxsize: int = 128): 
@@ -38,3 +40,8 @@ def parsing_DOC(): # нужно потестить, вероятно будет 
     result = worksheet.get_all_records() # массив после парсинга документа
     return result
 
+# if __name__ == '__main__':
+#     schedule.every(300).seconds.do(parsing_ID)
+#     schedule.every(300).seconds.do(parsing_DOC)
+#     schedule.run_pending() 
+#     time.sleep(100)

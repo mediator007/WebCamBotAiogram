@@ -26,6 +26,7 @@ class OrderDeals(StatesGroup):
     waiting_for_ID = State()
     waiting_for_admindeals = State()
     waiting_for_modeldeals = State()
+    waiting_for_modeldelete = State()
 
 async def bot_start(message: types.Message):
     #global Name 
@@ -144,17 +145,52 @@ async def admin_deals(message: types.Message, state: FSMContext):
         conn.close()
 
         if result != None:
-            await message.answer(result)
+            await message.answer(result[0])
             await OrderDeals.waiting_for_admindeals.set()
         else:
             await message.answer('Нет зарегестрированных моделей') #start / stop spam
             await OrderDeals.waiting_for_admindeals.set()
     elif message.text.lower() == available_admin_buttons[1]:
-        await message.answer("Удаление моделей находится в разработке")
-        await OrderDeals.waiting_for_ID.set()
+        await message.answer("Введите имя")
+        await OrderDeals.waiting_for_modeldelete.set()
+
     elif message.text.lower() == available_admin_buttons[2]:
         await message.answer("Введите свой ID")
         await OrderDeals.waiting_for_ID.set()
+
+async def model_delete(message: types.Message, state: FSMContext): ## в разработке
+    
+    conn = sqlite3.connect("database.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT name FROM logins")
+    datas = cursor.fetchone()
+    #print(message.text.lower())
+    #print(datas[0].casefold())
+    #conn.close()
+
+    if datas != None:
+        try:
+            print(1)
+            for i in range(len(datas)):
+                if datas[i][0].casefold() == message.text.lower():
+                    print(2)
+                    namefordel = datas[i][0]
+                    cursor.execute("DELETE FROM logins WHERE Name = ?", (namefordel, ))
+                    await message.answer(texts.DeleteModel)
+                    break
+        except TypeError:
+            print(3)
+            if datas[0].casefold() == message.text.lower():
+                print(4)
+                namefordel = datas[0]
+                cursor.execute("DELETE FROM logins WHERE Name = ?", (namefordel, ))
+                await message.answer(texts.DeleteModel)
+    else:
+        await message.answer("Нет зарегестрированных моделей")
+    
+    conn.commit()
+    conn.close()
+    await OrderDeals.waiting_for_admindeals.set()
 
 async def bot_help(message: types.Message, state: FSMContext):
     #await state.finish()
@@ -174,6 +210,7 @@ def register_handlers_deals(dp: Dispatcher):
     dp.register_message_handler(identification, state=OrderDeals.waiting_for_ID)
     dp.register_message_handler(model_deals, state=OrderDeals.waiting_for_modeldeals)
     dp.register_message_handler(admin_deals, state=OrderDeals.waiting_for_admindeals)
+    dp.register_message_handler(model_delete, state=OrderDeals.waiting_for_modeldelete)
     
 
 ############################################
@@ -187,7 +224,8 @@ async def set_commands_model(bot: Bot):
     commands = [
         BotCommand(command="/help", description="Помощь"),
         BotCommand(command="/bonussyst", description="Система бонусов"),
-        BotCommand(command="/mailing", description="Рассылка")
+        BotCommand(command="/mailing", description="Рассылка"),
+        BotCommand(command="/start", description="Перезапуск")
         ]
     await bot.set_my_commands(commands)
 
