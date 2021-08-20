@@ -107,18 +107,15 @@ async def model_deals(message: types.Message, state: FSMContext):
         if message.text.lower() not in available_work_buttons:
             await message.answer("Пожалуйста, выберите команду, используя клавиатуру ниже.")
             return
-        
-        #await state.update_data(chosen_food=message.text.lower())  
 
         if message.text.lower() == available_work_buttons[0]:
             Balance = func.Sum_for_week(result, Name)
-            await message.answer(Balance)
-            await OrderDeals.waiting_for_modeldeals.set()
-            #return
+            await message.answer(f"Ваш текущий баланс {Balance} $")
+            return
 
         elif message.text.lower() == available_work_buttons[1]:
-            await message.answer(text= "Bonus")
-            #await OrderDeals.waiting_for_modeldeals.set()
+            Balance = func.Sum_for_week(result, Name)
+            await message.answer(func.bonus(Balance))
             return
         
         elif message.text.lower() == available_work_buttons[2]: 
@@ -153,7 +150,8 @@ async def admin_deals(message: types.Message, state: FSMContext):
             await message.answer('Нет зарегестрированных моделей') #start / stop spam
             await OrderDeals.waiting_for_admindeals.set()
     elif message.text.lower() == available_admin_buttons[1]:
-        pass
+        await message.answer("Удаление моделей находится в разработке")
+        await OrderDeals.waiting_for_ID.set()
     elif message.text.lower() == available_admin_buttons[2]:
         await message.answer("Введите свой ID")
         await OrderDeals.waiting_for_ID.set()

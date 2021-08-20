@@ -57,7 +57,19 @@ def Sum_for_week(result, Name):
             else:
                 i += 1
     return sum(SummForWeek)
-    
 
+################
+bonus_table = {
+    300:51, 350:52, 400:53, 450:54, 500:55,\
+    550:56, 600:57, 650:58, 700:59, 750:60
+    }
+###############
+
+def bonus(balance):
+    for i in range(300, 800, 50):
+        if i > balance:
+            message = f"Остаток до бонуса {bonus_table[i]}% составляет {i - balance}$"
+            break
+    return message
 
    
