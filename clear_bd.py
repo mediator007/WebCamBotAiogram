@@ -5,7 +5,7 @@ cursor = conn.cursor()
 
 cursor.execute("DELETE FROM logins")
 conn.commit()
-conn.close
 
-cursor.execute("SELECT * FROM logins")
-print(cursor.fetchall())
+cursor.execute("SELECT name FROM logins")
+result = cursor.fetchall()
+print(result)

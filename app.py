@@ -99,9 +99,9 @@ async def model_deals(message: types.Message, state: FSMContext):
     cursor.execute("SELECT name FROM logins WHERE chat_id = ?", (m, ))
     name = cursor.fetchone()
     conn.close()
-
-    Name = name[0]
+    
     try:
+        Name = name[0]
         if message.text.lower() not in available_work_buttons:
             await message.answer("Пожалуйста, выберите команду, используя клавиатуру ниже.")
             return
@@ -115,9 +115,9 @@ async def model_deals(message: types.Message, state: FSMContext):
             Balance = func.Sum_for_week(result, Name)
             await message.answer(func.bonus(Balance))
             return
-        
-        elif message.text.lower() == available_work_buttons[2]: 
             
+        elif message.text.lower() == available_work_buttons[2]: 
+                
             conn = sqlite3.connect("database.db")
             cursor = conn.cursor()
             cursor.execute("DELETE FROM logins WHERE Name = ?", (Name, ))
@@ -125,11 +125,10 @@ async def model_deals(message: types.Message, state: FSMContext):
             conn.close()
 
             await message.answer("Введите свой ID")
-            await OrderDeals.waiting_for_ID.set()
+            await OrderDeals.waiting_for_ID.set()    
         
     except TypeError:
-
-        await message.answer('Администратор прекратил вашу сессию.')
+        await message.answer('Возникли проблемы. Обратитесь к администратору.')
         await message.answer("Введите свой ID")
         await OrderDeals.waiting_for_ID.set()
 
@@ -145,13 +144,16 @@ async def admin_deals(message: types.Message, state: FSMContext):
         conn = sqlite3.connect("database.db")
         cursor = conn.cursor()
         cursor.execute("SELECT name FROM logins")
-        result = cursor.fetchone()
+        result = cursor.fetchall()
+        print(result)
         conn.close()
 
-        if result != None:
-            await message.answer(result[0])
-            await OrderDeals.waiting_for_admindeals.set()
-        else:
+        try:
+            if result[0] != None:
+                for i in range(len(result)):
+                    await message.answer(result[i][0])
+                    await OrderDeals.waiting_for_admindeals.set()
+        except IndexError:
             await message.answer('Нет зарегестрированных моделей') 
             await OrderDeals.waiting_for_admindeals.set()
 
@@ -168,23 +170,20 @@ async def model_delete(message: types.Message, state: FSMContext):
     conn = sqlite3.connect("database.db")
     cursor = conn.cursor()
     cursor.execute("SELECT name FROM logins")
-    datas = cursor.fetchone()
+    datas = cursor.fetchall()
     if datas != None:
         try:
             for i in range(len(datas)):
-                if datas[i][0].casefold() == message.text.lower():
+                if datas[i][0].casefold() == message.text.lower(): # если много
                     namefordel = datas[i][0]
                     cursor.execute("DELETE FROM logins WHERE Name = ?", (namefordel, ))
                     await message.answer(texts.DeleteModel)
                     break
-                
-                elif datas[0].casefold() == message.text.lower():
-                    namefordel = datas[0]
-                    cursor.execute("DELETE FROM logins WHERE Name = ?", (namefordel, ))
-                    await message.answer(texts.DeleteModel)
-                    break
-        except TypeError:
-            pass
+                else:
+                    await message.answer("Имя не обнаружено")
+
+        except TypeError as e:
+            print(e)
     else:
         await message.answer("Такое имя отсутствует")
     

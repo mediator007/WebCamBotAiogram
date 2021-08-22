@@ -45,7 +45,8 @@ def Sum_for_week(result, Name):
                 Weeknumber = datetime.date(DateForCheck[0], DateForCheck[1], DateForCheck[2]).isocalendar()[1] # Получаем номер недели даты в строке
                 #print(Weeknumber)
             except Exception as e:
-                print("Неверное заполнение таблицы") # Если дата админом поставлена неверно
+                print(e)
+                print("Неверное заполнение даты в таблице") # Если дата админом поставлена неверно
             if NowWeeknumber == Weeknumber:
                 SummForDay = (0.05*(\
                 result[i]['Chaturbate (tks)'] \
