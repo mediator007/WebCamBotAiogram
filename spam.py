@@ -5,7 +5,7 @@ import telebot
 import config1
 import schedule
 import parsing as par
-#import asyncio
+import local_vars
 
 
 WebCamBot = telebot.TeleBot(config1.token)
@@ -20,6 +20,7 @@ def spam():
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM logins")
     datas = cursor.fetchall() # кортеж имен зареганых моделей
+    #datas = datas1[-100:]
     print(datas)
     conn.close()
     
@@ -27,21 +28,19 @@ def spam():
     result1 = res[-100:]
 
     if datas != None:
-        Balance = func.Sum_for_week(result1, datas[2]) # если в бд зарегана 1 модель
-        if Balance >= vars.c:
-            WebCamBot.send_message(datas[0], text = f"До бонуса 60% осталось всего {750 - Balance}$. Возможно стоит взять еще одну смену!")
-        else:
-            for i in range(len(datas)):
-                Balance = func.Sum_for_week(result1, datas[i][2]) # если в бд зарегано несколько моделей
-                if Balance >= vars.c:
-                    WebCamBot.send_message(datas[i][0], text = f"До бонуса 60% осталось всего {750 - Balance}$. Возможно стоит взять еще одну смену!")
+        for i in range(len(datas)):
+            print(len(datas))
+            Balance = func.Sum_for_week(result1, datas[i][2]) 
+            if Balance >= local_vars.c:
+                WebCamBot.send_message(datas[i][0], text = f"До бонуса 60% осталось всего {750 - Balance}$. Возможно стоит взять еще одну смену!")
+            
     else:
         print("NO models for spam")
         pass
 
 while True:
-    schedule.every(0.25).minutes.do(spam)
+    schedule.every(1).hour.do(spam)
     #schedule.every().day.at("12:00").do(spam)
     schedule.run_pending() 
-    #asyncio.sleep(30) 
+    time.sleep(60) 
 

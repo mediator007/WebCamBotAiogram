@@ -1,6 +1,6 @@
 import datetime
 import time
-import vars
+import local_vars
 
 def search_id(massiv, id):  ###поиск айдишника В ДОКУМЕНТЕ РЕГИСТРАЦИИ
     for i in range(len(massiv)):  
@@ -21,12 +21,11 @@ def search_name(massiv, id):  ###поиск имени В ДОКУМЕНТЕ Р�
     return Name
 
 def admin_search(admin_id):  ### проверка админского айдишника
-    if admin_id == vars.admin_pass: 
+    if admin_id == local_vars.admin_pass: 
         admin_search = True
     else:
         admin_search = False
     return admin_search
-
 
 def Sum_for_week(result, Name):
     now = [time.localtime()[0], time.localtime()[1], time.localtime()[2]] # Получаем день, месяц , год сегодняшней даты
@@ -48,6 +47,11 @@ def Sum_for_week(result, Name):
                 print(e)
                 print("Неверное заполнение даты в таблице") # Если дата админом поставлена неверно
             if NowWeeknumber == Weeknumber:
+                for name in local_vars.cells_for_sum:
+                    if result[i][name] == '': # если в документе пустые ячейки, заменяет Нулями
+                        result[i][name] = 0
+                    elif type(result[i][name]) == str:
+                        result[i][name] = 0
                 SummForDay = (0.05*(\
                 result[i]['Chaturbate (tks)'] \
                 + result[i]['CamSoda'] \
@@ -60,17 +64,10 @@ def Sum_for_week(result, Name):
                 i += 1
     return sum(SummForWeek)
 
-################
-bonus_table = {
-    300:51, 350:52, 400:53, 450:54, 500:55,\
-    550:56, 600:57, 650:58, 700:59, 750:60
-    }
-###############
-
 def bonus(balance):
     for i in range(300, 800, 50):
         if i > balance:
-            message = f"Остаток до бонуса {bonus_table[i]}% составляет {i - balance}$"
+            message = f"Остаток до бонуса {local_vars.bonus_table[i]}% составляет {i - balance}$"
             break
     return message
 
