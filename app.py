@@ -109,7 +109,7 @@ async def model_deals(message: types.Message, state: FSMContext):
 
         if message.text.lower() == available_work_buttons[0]:
             Balance = func.Sum_for_week(result, Name)
-            await message.answer(f"Ваш текущий баланс {Balance} $")
+            await message.answer(f"Ваш текущий баланс {Balance:.2f} $")
             return
 
         elif message.text.lower() == available_work_buttons[1]:
