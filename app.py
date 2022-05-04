@@ -11,6 +11,7 @@ import config1
 import parsing as par
 import functions as func
 import texts
+import loguru
 
 available_work_buttons = ["узнать баланс", "остаток до бонуса", "выйти из аккаунта"]
 available_admin_buttons = ["список моделей", "удалить модель", "выйти из аккаунта"]
@@ -233,8 +234,9 @@ async def main():
         level=logging.INFO,
         format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
     )
-    logger.error("Starting bot")
+    logger.info("Starting bot")
     bot = Bot(token=config1.token)
+    # print("!!!!!!", bot.validate_token())
     dp = Dispatcher(bot, storage=MemoryStorage())
     register_handlers_deals(dp)
     await set_commands_model(bot)
