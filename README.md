@@ -6,7 +6,7 @@
 
 Чтобы запустить проект в docker:
 
-./run.sh start
+```./run.sh start```
 
 При запуске:
 
