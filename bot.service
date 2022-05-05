@@ -1,0 +1,15 @@
+[Unit]
+Description=Telegram bot 'WCB'
+After=syslog.target
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/usr/bot
+ExecStart=/usr/bin/python3 /usr/bot/app.py
+RestartSec=10
+Restart=always
+ 
+[Install]
+WantedBy=multi-user.target
