@@ -2,7 +2,7 @@ import sqlite3
 
 
 def delete_from_logins():
-    conn = sqlite3.connect("database.db")
+    conn = sqlite3.connect("../database.db")
     cursor = conn.cursor()
     cursor.execute("DELETE FROM logins")
     print("logins are Empty")
@@ -11,9 +11,9 @@ def delete_from_logins():
 
 
 def select_all_logins():
-    conn = sqlite3.connect("database.db")
+    conn = sqlite3.connect("../database.db")
     cursor = conn.cursor()
-    cursor.execute("SELECT name FROM logins")
+    cursor.execute("SELECT * FROM logins")
     result = cursor.fetchall()
     print(result)
 

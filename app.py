@@ -1,26 +1,23 @@
 import asyncio
-import logging
-from aiogram import Bot, Dispatcher, types
+from aiogram import Bot
 from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.types.bot_command import BotCommand
 import sqlite3
-import config1
-from parsing import parsing_id, parsing_doc
-import functions as func
-import texts
-import loguru
-
-available_work_buttons = ["узнать баланс", "остаток до бонуса", "выйти из аккаунта"]
-available_admin_buttons = ["список моделей", "удалить модель", "выйти из аккаунта"]
+from utils.config1 import token
+from utils.parsing import parsing_id, parsing_doc
+from utils.functions import search_id, search_name, admin_search, sum_for_week, bonus
+from utils import texts
+from utils.local_vars import available_work_buttons, available_admin_buttons
+from loguru import logger
+from typing import List
 
 conn = sqlite3.connect("database.db")
 cursor = conn.cursor()
 cursor.execute("""CREATE TABLE IF NOT EXISTS logins (chat_id, ID, Name)""")
 conn.commit()
-cursor.execute("SELECT * FROM logins")
 conn.close()
 
 
@@ -32,68 +29,82 @@ class OrderDeals(StatesGroup):
 
 
 async def bot_start(message: types.Message):
-    RegistrationNum = message.from_user.id
+    registrationNum = message.from_user.id
 
     with sqlite3.connect("database.db") as conn:
         cursor = conn.cursor()
-        cursor.execute("SELECT name FROM logins WHERE chat_id = ?", (RegistrationNum,))
+        # Ищем имя модели по id беседы
+        cursor.execute("SELECT name FROM logins WHERE chat_id = ?", (registrationNum,))
         result = cursor.fetchone()
-    # если есть в бд
+    # если есть в бд - восстанавливаем сессию
     if result:
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
         for name in available_work_buttons:
             markup.add(name)
         await message.answer("Сессия восстановлена.", reply_markup=markup)
+        logger.info(f"Сессия восстановлена для id {registrationNum}")
         await OrderDeals.waiting_for_modeldeals.set()
-    # если нет в бд
+    # если нет в бд ожидаем ввод id
     else:
         await message.answer(texts.Hello, reply_markup=types.ReplyKeyboardRemove())
         await OrderDeals.waiting_for_ID.set()
 
 
 async def identification(message: types.Message, state: FSMContext):
-    res = parsing_id()
+    # Все id из файла с доступами
+    res: list = parsing_id()
+
     try:
-        ID = message.text
-        if not ID.isdigit():
+        # введенный id
+        input_id = message.text
+        if not input_id.isdigit():
             await message.answer("Id должен быть числом")
             await OrderDeals.waiting_for_ID.set()
-            return
-        Num = int(ID)
-        # Поиск айдишника по массиву
-        search = func.search_id(res, Num)
+
+        num = int(input_id)
+        # Поиск введенного id по массиву всех зарегестрированных id
+        search = search_id(res, num)
         # Если нет айдишника в списке моделей, проверка на айдишник админа
         if not search:
-            admin_search = func.admin_search(Num)
+            admin_search_res = admin_search(num)
             # Если айдишник админа - добавляем кнопки, улетаем в функцию админа
-            if admin_search == True:
+            if admin_search_res:
                 markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
                 for name in available_admin_buttons:
                     markup.add(name)
+                logger.info(f"Начата сессия администратора")
                 await message.answer("Сессия администратора", reply_markup=markup)
                 await OrderDeals.waiting_for_admindeals.set()
             # Если не модель и не админ - повторяем ввод айдишника
             else:
+                logger.warning(f"Неверный ввод id - {num}")
                 await message.answer("ID не обнаружен. Попробуйте снова.")
                 await OrderDeals.waiting_for_ID.set()
+        # Введенный id найден в файле регистрации
         else:
-            Name = func.search_name(res, Num)
-            RegistrationNum = message.from_user.id
+            # Получаем имя модели по введенному id
+            name = search_name(res, num)
+            # id диалога
+            registrationNum = message.from_user.id
 
-            conn = sqlite3.connect("database.db")
-            cursor = conn.cursor()
-            cursor.execute("""INSERT INTO logins VALUES (?, ?, ?)""",
-                           (RegistrationNum, Num, Name))  # заполняем бд для авторизации при ребуте
-            conn.commit()
-            conn.close()
-
+            # заполняем бд для авторизации при ребуте (id беседы, id модели, имя модели)
+            with sqlite3.connect("database.db") as conn:
+                cursor = conn.cursor()
+                cursor.execute("""INSERT INTO logins VALUES (?, ?, ?)""",
+                               (registrationNum, num, name))
+                conn.commit()
+            # Добавляем клавиатуру с кнопками из списка
             markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-            for name in available_work_buttons:
-                markup.add(name)
-            await message.answer("Привет " + Name + ", ты зарегистрирована.", reply_markup=markup)
+            for button in available_work_buttons:
+                markup.add(button)
+            logger.info(f"Вход в учетную запись {name}")
+            await message.answer(f"Привет {name}, ты зарегистрирована.", reply_markup=markup)
             await OrderDeals.waiting_for_modeldeals.set()
+
     except Exception as e:
-        print(e)
+        logger.error(f"Ошибка ввода id - {e}")
+        await message.answer(texts.Hello, reply_markup=types.ReplyKeyboardRemove())
+        await OrderDeals.waiting_for_ID.set()
 
 
 async def model_deals(message: types.Message, state: FSMContext):
@@ -102,13 +113,12 @@ async def model_deals(message: types.Message, state: FSMContext):
     # недельный баланс обычно помещается в последнюю сотню строк выдачи
     result = res[-100:]
 
-    m = message.from_user.id
+    dialog_id = message.from_user.id
 
-    conn = sqlite3.connect("database.db")
-    cursor = conn.cursor()
-    cursor.execute("SELECT name FROM logins WHERE chat_id = ?", (m,))
-    name = cursor.fetchone()
-    conn.close()
+    with sqlite3.connect("database.db") as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT name FROM logins WHERE chat_id = ?", (dialog_id,))
+        name = cursor.fetchone()
 
     try:
         Name = name[0]
@@ -117,13 +127,13 @@ async def model_deals(message: types.Message, state: FSMContext):
             return
 
         if message.text.lower() == available_work_buttons[0]:
-            Balance = func.Sum_for_week(result, Name)
+            Balance = sum_for_week(result, Name)
             await message.answer(f"Ваш текущий баланс {Balance:.2f} $")
             return
 
         elif message.text.lower() == available_work_buttons[1]:
-            Balance = func.Sum_for_week(result, Name)
-            await message.answer(func.bonus(Balance))
+            Balance = sum_for_week(result, Name)
+            await message.answer(bonus(Balance))
             return
 
         elif message.text.lower() == available_work_buttons[2]:
@@ -151,12 +161,10 @@ async def admin_deals(message: types.Message, state: FSMContext):
     elif message.text.lower() == available_admin_buttons[0]:
         await message.answer("Список зарегестрированных моделей:")
 
-        conn = sqlite3.connect("database.db")
-        cursor = conn.cursor()
-        cursor.execute("SELECT name FROM logins")
-        result = cursor.fetchall()
-        print(result)
-        conn.close()
+        with sqlite3.connect("database.db") as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT name FROM logins")
+            result = cursor.fetchall()
 
         try:
             if result[0] is not None:
@@ -193,7 +201,7 @@ async def model_delete(message: types.Message, state: FSMContext):
                     await message.answer("Имя не обнаружено")
 
         except TypeError as e:
-            print(e)
+            logger.error(f"Model delete with with {e}")
     else:
         await message.answer("Такое имя отсутствует")
 
@@ -225,9 +233,6 @@ def register_handlers_deals(dp: Dispatcher):
     dp.register_message_handler(model_delete, state=OrderDeals.waiting_for_modeldelete)
 
 
-logger = logging.getLogger(__name__)
-
-
 # Регистрация команд, отображаемых в интерфейсе Telegram
 async def set_commands_model(bot: Bot):
     commands = [
@@ -240,13 +245,7 @@ async def set_commands_model(bot: Bot):
 
 
 async def main():
-    # Настройка логирования в stdout
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
-    )
-    logger.info("Starting bot")
-    bot = Bot(token=config1.token)
+    bot = Bot(token=token)
     dp = Dispatcher(bot, storage=MemoryStorage())
     register_handlers_deals(dp)
     await set_commands_model(bot)
@@ -254,4 +253,5 @@ async def main():
 
 
 if __name__ == '__main__':
+    logger.add("debug.log", format="{time} {level} {message}", level="INFO", rotation="1 MB")
     asyncio.run(main())

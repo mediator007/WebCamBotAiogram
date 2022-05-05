@@ -31,8 +31,7 @@ def timed_lru_cache(seconds: int, maxsize: int = 128):
 @timed_lru_cache(60)
 def parsing_id() -> list:
     """
-
-    :return: List
+    Возвращает список id из файла регистрации
     """
     gc = gspread.service_account(filename="webcambot-ad6a9a73eef6.json")
     # remove to .env

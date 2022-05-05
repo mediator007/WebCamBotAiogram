@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "webcambot",
+  "private_key_id": "ad6a9a73eef6539d12b5892863a23e4ae7d6c84d",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCYQZ4tiG0L6qir\nBsgPY5BpdnGbYmcDzEHyq/KXqi3/uz0H6bS7DCui+l+QZES+JuQYnE6qcx2mLfNn\nsLAFfuEVprGB0R5YtS9Ko7ONTFZdo/DzU0lY6vxWUEHl1Jg6tzXRNnaf4A4zeUYc\nFdySkPNY42Hh/SyFXCOuHnSPFyiTak+7aPj7uOpS7EttvhclDAUj9dMojs91rqiI\naw4SI+hsUSnp65Qqtb4WMgDvouani1DUdu11d2a3zozqLsLr5DwVJg1H+p6SeL8z\nAVOKs1TCl8ZjjZiEwm23rftU8oseTAoBWKXdVjxNYC4wE3JxJyrDw0bLgxrJwO1S\nml7bxKN/AgMBAAECggEAAJhBBeyCgIlqH0DnhyfcaI0N5I192YXyu//v8qe3hkg0\n9NL04cYqZXiU5vt9SUDdozr5E7FfbEbBrKYECgF036DHELrAY5hRlvkMuoCR1cvO\nJSUuJCrG0Y9+smciMRiGHUsZK4a0h37xxypOskPer3oz564Vfm/ds9BqpCRzBCBk\npCFwRJdsZoM8uulcomXd91MC80sMQaVWod5/he5hL2IHG1Io+NLnykdVPu7Ec3tm\nL9mi0pCnsiBVdZzE6kr8DWrbTjaJYq92fWPQmhhaccBy/3V4mymFTX2IdVY15Pn3\nWnC7rDyPYV4yqQrmUIh0w8N+tmeQlnDrVE5m1toIAQKBgQDN9T8InXSWhFdhHp8J\nW5ykvzzJ3vOYSr36Tt1hs6KGz9WrWevRbQCQOeI64WrIXi2r8e4m3g5jP3iHb2ai\nnvvFIHT+X7oaPDVV2FjL2gk11iwDmTj8f+WcZQnNbo7ZlftHdnGM4DDVj33KQ9ku\nVT2k95DPFAGx7qv80fu6aq6SEwKBgQC9QBWKVpNV3vGsKQeCBu8DM77C+5uqeVhn\nBGxH8JpD2UUBNrt3wdSQrTA/yjS8CYP5orYaY+7AsE5viI2ZPQIejchV1mjrHWo8\ngFqJx7WU0YcC4dyLYrxaT847B7h2WHRuItD8BOnI0E5crqrorSQ5k+/90Tpq2ZMr\nRuN/MDc2ZQKBgDaEqL7bDzWYqpimxmpvubNSfADj5490mX1cyvVF28vb0C+fifDR\n7cg/ykbTzLRlWameTPA075IOBxWyw3RgqTyxLsb3CAhRz7x9nGO5v55kpxn8wTz1\njg4sIMAkd+PY878i90PXRJYDecTE2QSOw9abQdXO8fPrvdMasovSGYvJAoGAGSJp\nufXFm6IAdtz8IkjJdaNpsnu4MOvs0cHEn8lUs64nfAHI5B7aHFzkC5TPbCnXXVA+\n30JmczD3Odjo9XEk1un9sWjIhnFhqqdhXusnMpyhUcCtidWTLmtq+GwOE6mrzPTS\nzKXaZtFDlwubp0tXhE4hkZQ4Lfi3kwfXLw04SAECgYEAhyunyG4AElNFFNgGqCMa\njHReONmR+O+korz0P0iLAbs7FioBtd81ShIgXrTjpUYTubhsu3O1AJPEr6QG5t0V\njlL1uxdbALctV4Fi3p8GzOrJZUoT9gtW/OqzpBYryx7jpCdFlIcaWPXQV4ejitM/\nkwxxWIR1tou8s1u7Q2UEJ7k=\n-----END PRIVATE KEY-----\n",
+  "client_email": "webcambotacc-842@webcambot.iam.gserviceaccount.com",
+  "client_id": "116338942011653031863",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/webcambotacc-842%40webcambot.iam.gserviceaccount.com"
+}

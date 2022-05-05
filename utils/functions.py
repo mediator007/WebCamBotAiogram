@@ -1,6 +1,6 @@
 import datetime
 import time
-import local_vars
+from utils.local_vars import admin_pass, cells_for_sum, bonus_table
 
 
 def search_id(massiv, id):
@@ -33,14 +33,14 @@ def admin_search(admin_id):
     """
     Проверка админского айдишника
     """
-    if admin_id == local_vars.admin_pass:
+    if admin_id == admin_pass:
         search_res = True
     else:
         search_res = False
     return search_res
 
 
-def Sum_for_week(result, Name):
+def sum_for_week(result, Name):
     # Получаем день, месяц , год сегодняшней даты
     now = [time.localtime()[0], time.localtime()[1], time.localtime()[2]]
     # Получаем номер недели нынешней даты
@@ -65,7 +65,7 @@ def Sum_for_week(result, Name):
                 # Если дата админом поставлена неверно
                 print("Неверное заполнение даты в таблице")
             if NowWeeknumber == weeknumber:
-                for name in local_vars.cells_for_sum:
+                for name in cells_for_sum:
                     if result[i][name] == '':  # если в документе пустые ячейки, заменяет Нулями
                         result[i][name] = 0
                     elif type(result[i][name]) == str:
@@ -89,6 +89,6 @@ def bonus(balance):
     """
     for i in range(300, 800, 50):
         if i > balance:
-            message = f"Остаток до бонуса {local_vars.bonus_table[i]}% составляет {i - balance}$"
+            message = f"Остаток до бонуса {bonus_table[i]}% составляет {i - balance}$"
             break
     return message
