@@ -2,17 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="cb9e1b19-f5f5-4e6d-b74e-304b35a31008" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/utils/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/webcambot-ad6a9a73eef6.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/db_manage.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/db_manage.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/functions.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/functions.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/local_vars.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/local_vars.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/parsing.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/parsing.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/spam.py" beforeDir="false" afterPath="$PROJECT_DIR$/spam.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/texts.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/texts.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/parsing.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/parsing.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

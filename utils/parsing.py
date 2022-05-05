@@ -1,6 +1,7 @@
 from functools import lru_cache, wraps
 from datetime import datetime, timedelta
 import gspread
+from utils.config1 import main_file, registration_file
 
 
 def timed_lru_cache(seconds: int, maxsize: int = 128):
@@ -35,7 +36,7 @@ def parsing_id() -> list:
     """
     gc = gspread.service_account(filename="webcambot-ad6a9a73eef6.json")
     # remove to .env
-    sh = gc.open('WebCamBot')
+    sh = gc.open(registration_file)
     worksheet = sh.sheet1
     result = worksheet.get_all_records(expected_headers=())
     return result
@@ -44,12 +45,11 @@ def parsing_id() -> list:
 @timed_lru_cache(60)
 def parsing_doc():
     """
-
-    :return:
+    Возвращает все записи из документа
     """
     gc = gspread.service_account(filename="webcambot-ad6a9a73eef6.json")
     # remove to .env
-    sh = gc.open('КД 2020 Загородный')
+    sh = gc.open(main_file)
     worksheet = sh.sheet1
     result = worksheet.get_all_records(expected_headers=())
     return result
