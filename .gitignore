@@ -128,7 +128,7 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-utils/webcambot-ad6a9a73eef6.json
+.json
 utils/config1.py
 database.db
 .idea
