@@ -128,7 +128,8 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
+TODO.txt
 .json
-utils/config1.py
+utils/config.py
 database.db
 .idea

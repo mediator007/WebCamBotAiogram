@@ -6,7 +6,7 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.types.bot_command import BotCommand
 import sqlite3
-from utils.config1 import token
+from utils.config import token
 from utils.parsing import parsing_id, parsing_doc
 from utils.functions import search_id, search_name, admin_search, sum_for_week, bonus
 from utils import texts

@@ -2,7 +2,7 @@ import sqlite3
 import time
 import telebot
 import schedule
-from utils import parsing as par, config1, functions as func, local_vars
+from utils import parsing as par, config, functions as func, local_vars
 
 WebCamBot = telebot.TeleBot(config1.token)
 

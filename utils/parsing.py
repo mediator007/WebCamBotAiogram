@@ -1,7 +1,7 @@
 from functools import lru_cache, wraps
 from datetime import datetime, timedelta
 import gspread
-from utils.config1 import main_file, registration_file
+from utils.config import main_file, registration_file
 
 
 def timed_lru_cache(seconds: int, maxsize: int = 128):
