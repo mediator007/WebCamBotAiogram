@@ -1,6 +1,7 @@
 import datetime
 import time
 from utils.local_vars import admin_pass, cells_for_sum, bonus_table
+from loguru import logger
 
 
 def search_id(massiv, id):
@@ -61,12 +62,12 @@ def sum_for_week(result, Name):
                 # Получаем номер недели даты в строке
                 weeknumber = datetime.date(DateForCheck[0], DateForCheck[1], DateForCheck[2]).isocalendar()[1]
             except Exception as e:
-                print(e)
                 # Если дата админом поставлена неверно
-                print("Неверное заполнение даты в таблице")
+                logger.error(f"Неверно установлена дата - {e}")
             if NowWeeknumber == weeknumber:
                 for name in cells_for_sum:
-                    if result[i][name] == '':  # если в документе пустые ячейки, заменяет Нулями
+                    # если в документе пустые ячейки, заменяет Нулями
+                    if result[i][name] == '':
                         result[i][name] = 0
                     elif type(result[i][name]) == str:
                         result[i][name] = 0
@@ -76,7 +77,7 @@ def sum_for_week(result, Name):
                         + result[i]['MFC (tks)']
                         + result[i]['Stripchat (tks)']
                 )
-                              + result[i]['Jasmin'] + result[i]['Streamate']) * 0.5  # Добавить остальные полЯЯ!!!
+                              + result[i]['Jasmin'] + result[i]['Streamate']) * 0.5  # Добавить остальные поля!!!
                 SummForWeek.append(SummForDay)
             else:
                 i += 1
