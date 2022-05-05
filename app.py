@@ -34,19 +34,19 @@ class OrderDeals(StatesGroup):
 async def bot_start(message: types.Message):
     RegistrationNum = message.from_user.id
 
-    conn = sqlite3.connect("database.db")
-    cursor = conn.cursor()
-    cursor.execute("SELECT name FROM logins WHERE chat_id = ?", (RegistrationNum,))
-    result = cursor.fetchone()
-    conn.close()
-
-    if result:  # если есть в бд
+    with sqlite3.connect("database.db") as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT name FROM logins WHERE chat_id = ?", (RegistrationNum,))
+        result = cursor.fetchone()
+    # если есть в бд
+    if result:
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
         for name in available_work_buttons:
             markup.add(name)
         await message.answer("Сессия восстановлена.", reply_markup=markup)
         await OrderDeals.waiting_for_modeldeals.set()
-    else:  # если нет в бд
+    # если нет в бд
+    else:
         await message.answer(texts.Hello, reply_markup=types.ReplyKeyboardRemove())
         await OrderDeals.waiting_for_ID.set()
 
@@ -60,18 +60,20 @@ async def identification(message: types.Message, state: FSMContext):
             await OrderDeals.waiting_for_ID.set()
             return
         Num = int(ID)
-        search = func.search_id(res, Num)  ## Поиск айдишника по массиву
-
-        if search == False:  ##Если нет айдишника в списке моделей, проверка на айдишник админа
+        # Поиск айдишника по массиву
+        search = func.search_id(res, Num)
+        # Если нет айдишника в списке моделей, проверка на айдишник админа
+        if not search:
             admin_search = func.admin_search(Num)
-            if admin_search == True:  # Если айдишник админа - добавляем кнопки, улетаем в функцию админа
+            # Если айдишник админа - добавляем кнопки, улетаем в функцию админа
+            if admin_search == True:
                 markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
                 for name in available_admin_buttons:
                     markup.add(name)
                 await message.answer("Сессия администратора", reply_markup=markup)
                 await OrderDeals.waiting_for_admindeals.set()
-
-            else:  ## Если не модель и не админ - повторяем ввод айдишника
+            # Если не модель и не админ - повторяем ввод айдишника
+            else:
                 await message.answer("ID не обнаружен. Попробуйте снова.")
                 await OrderDeals.waiting_for_ID.set()
         else:
@@ -88,15 +90,17 @@ async def identification(message: types.Message, state: FSMContext):
             markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
             for name in available_work_buttons:
                 markup.add(name)
-            await message.answer("Привет " + Name + ", ты зарегестрирована.", reply_markup=markup)
+            await message.answer("Привет " + Name + ", ты зарегистрирована.", reply_markup=markup)
             await OrderDeals.waiting_for_modeldeals.set()
-    except:
-        pass
+    except Exception as e:
+        print(e)
 
 
 async def model_deals(message: types.Message, state: FSMContext):
-    res = parsing_doc()  # парсинг из кэша
-    result = res[-100:]  # недельный баланс обычно помещается в последнюю сотню строк выдачи
+    # парсинг из кэша
+    res = parsing_doc()
+    # недельный баланс обычно помещается в последнюю сотню строк выдачи
+    result = res[-100:]
 
     m = message.from_user.id
 
@@ -155,7 +159,7 @@ async def admin_deals(message: types.Message, state: FSMContext):
         conn.close()
 
         try:
-            if result[0] != None:
+            if result[0] is not None:
                 for i in range(len(result)):
                     await message.answer(result[i][0])
                     await OrderDeals.waiting_for_admindeals.set()
@@ -177,7 +181,7 @@ async def model_delete(message: types.Message, state: FSMContext):
     cursor = conn.cursor()
     cursor.execute("SELECT name FROM logins")
     datas = cursor.fetchall()
-    if datas != None:
+    if datas is not None:
         try:
             for i in range(len(datas)):
                 if datas[i][0].casefold() == message.text.lower():  # если много
