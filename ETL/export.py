@@ -7,8 +7,6 @@ import gspread
 from backoff import backoff
 from utils.config import main_file, registration_file
 
-logger.add("debug.log", format="{time} {level} {message}", level="INFO", rotation="1 MB")
-
 
 class GDriveExport:
     # def __init__(self, connection, state):

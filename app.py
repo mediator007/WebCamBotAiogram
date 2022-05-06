@@ -253,5 +253,5 @@ async def main():
 
 
 if __name__ == '__main__':
-    logger.add("debug.log", format="{time} {level} {message}", level="INFO", rotation="1 MB")
+    logger.add("bot_debug.log", format="{time} {level} {message}", level="INFO", rotation="1 MB")
     asyncio.run(main())
