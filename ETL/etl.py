@@ -7,6 +7,7 @@ from export import GDriveExport
 from transform import main_transform, registration_transform
 from load import SqliteLoader
 
+
 def etl(connector) -> None:
     """
     Main etl process
@@ -16,24 +17,26 @@ def etl(connector) -> None:
         export = GDriveExport()
         registration_result = export.export_registration()
         main_result = export.export_main()
-       
+
         # Transform
-        transform_regitration_res = registration_transform(registration_result)
+        transform_registration_res = registration_transform(registration_result)
         transform_main_res = main_transform(main_result)
+        print("registration", transform_registration_res[-1])
+        print("main", transform_main_res[-1])
 
         # Load
-        # loader = SqliteLoader(connector)
+        loader = SqliteLoader(connector)
+        loader.save_to_table('registration', 'name', transform_registration_res)
+        loader.save_to_table('main', 'chat_id', transform_main_res)
 
-        print("registration", transform_regitration_res[0])
-        print("main", transform_main_res[0])
         sleep(300)
 
 
 if __name__ == '__main__':
     logger.add("etl_debug.log", format="{time} {level} {message}", level="INFO", rotation="1 MB")
 
-    # try:
-    with sqlite_connector("etl_database.db") as sqlite_conn:
-        etl(sqlite_conn)
-    # except Exception as exc:
-    #     logger.error(f"{exc}")
+    try:
+        with sqlite_connector("etl_database.db") as sqlite_conn:
+            etl(sqlite_conn)
+    except Exception as exc:
+        logger.error(f"{exc}")

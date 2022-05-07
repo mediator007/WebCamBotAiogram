@@ -1,10 +1,18 @@
+
 def insert(table: str, keys: list, arguments: tuple, conflict_field: str) -> str:
-    # Убрал slots т.к. с ними не работает created: datetime = field(default_factory=datetime.now)
     fields = ', '.join(keys)
-    placeholder = ', '.join(['%s'] * len(arguments))
+    placeholder = ', '.join(['?'] * len(arguments))
     sql_line = (
         f'INSERT INTO {table} '
         f'({fields}) '
-        f'VALUES ({placeholder}) ON CONFLICT ({conflict_field}) DO NOTHING;'
+        f'VALUES ({placeholder});'
     )
     return sql_line
+
+
+def table_creation(table: str, keys: list):
+    fields = ', '.join(keys)
+    sql_line = f"""CREATE TABLE IF NOT EXISTS {table} ({fields});"""
+    return sql_line
+
+
