@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 
 import gspread
 
-from utils.config import main_file, registration_file, gdrive_config
+from utils.config import main_file, registration_file
 
 
 def timed_lru_cache(seconds: int, maxsize: int = 128):

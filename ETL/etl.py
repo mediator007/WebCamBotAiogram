@@ -6,6 +6,7 @@ from connections import sqlite_connector
 from export import GDriveExport
 from transform import main_transform, registration_transform
 from load import SqliteLoader
+from db_manage import create_main, create_registration
 
 
 def etl(connector) -> None:
@@ -21,8 +22,6 @@ def etl(connector) -> None:
         # Transform
         transform_registration_res = registration_transform(registration_result)
         transform_main_res = main_transform(main_result)
-        print("registration", transform_registration_res[-2])
-        print("main", transform_main_res[-2])
 
         # Load
         loader = SqliteLoader(connector)
@@ -34,10 +33,16 @@ def etl(connector) -> None:
 
 
 if __name__ == '__main__':
+
     logger.add("etl_debug.log", format="{time} {level} {message}", level="INFO", rotation="1 MB")
 
+    # Create tables
+    create_main()
+    create_registration()
+
+    # main etl process
     try:
-        with sqlite_connector("etl_database.db") as sqlite_conn:
+        with sqlite_connector("../database.db") as sqlite_conn:
             etl(sqlite_conn)
     except Exception as exc:
         logger.error(f"{exc}")

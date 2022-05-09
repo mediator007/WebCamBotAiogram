@@ -132,4 +132,5 @@ TODO.txt
 *.json
 utils/config.py
 database.db
+etl_database.db
 .idea
