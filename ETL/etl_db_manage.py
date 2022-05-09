@@ -21,13 +21,38 @@ def delete_from_logins():
 def select_all_logins():
     conn = sqlite3.connect("etl_database.db")
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM main LIMIT 5")
+    cursor.execute("SELECT * FROM main WHERE (date > '2011-12-12') LIMIT 5")
     result = cursor.fetchall()
-    print(result)
+    print(result[0])
+    print(type(result[0][0]))
+    conn.close()
+
+def create_main():
+    conn = sqlite3.connect("etl_database.db")
+    cursor = conn.cursor()
+    cursor.execute("""CREATE TABLE IF NOT EXISTS main (
+        date DATE,
+        name TEXT NOT NULL,
+        chaturbate INTEGER,
+        camsoda INTEGER,
+        mfc INTEGER,
+        stripchat INTEGER,
+        jasmin FLOAT,
+        streamate FLOAT);""")
     conn.close()
 
 
+def create_registration():
+    conn = sqlite3.connect("etl_database.db")
+    cursor = conn.cursor()
+    cursor.execute("""CREATE TABLE IF NOT EXISTS registration (
+        id INTEGER,
+        name TEXT NOT NULL);""")
+    conn.close()
+
 if __name__ == "__main__":
     # delete_from_logins()
+    create_main()
+    create_registration()
     select_all_logins()
     # drop_table()

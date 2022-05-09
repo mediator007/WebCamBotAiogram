@@ -21,14 +21,15 @@ def etl(connector) -> None:
         # Transform
         transform_registration_res = registration_transform(registration_result)
         transform_main_res = main_transform(main_result)
-        print("registration", transform_registration_res[-1])
-        print("main", transform_main_res[-1])
+        print("registration", transform_registration_res[-2])
+        print("main", transform_main_res[-2])
 
         # Load
         loader = SqliteLoader(connector)
-        loader.save_to_table('registration', 'name', transform_registration_res)
-        loader.save_to_table('main', 'chat_id', transform_main_res)
-
+        loader.save_to_table('registration', transform_registration_res)
+        loader.save_to_table('main', transform_main_res)
+        
+        logger.info(f'ETL process complete')
         sleep(300)
 
 

@@ -1,5 +1,5 @@
 
-def insert(table: str, keys: list, arguments: tuple, conflict_field: str) -> str:
+def insert(table: str, keys: list, arguments: tuple) -> str:
     fields = ', '.join(keys)
     placeholder = ', '.join(['?'] * len(arguments))
     sql_line = (
@@ -9,10 +9,13 @@ def insert(table: str, keys: list, arguments: tuple, conflict_field: str) -> str
     )
     return sql_line
 
+def data_values_to_dataclass(data_class, data):
+    my_data = data_class(**data)
+    return my_data
 
-def table_creation(table: str, keys: list):
-    fields = ', '.join(keys)
-    sql_line = f"""CREATE TABLE IF NOT EXISTS {table} ({fields});"""
-    return sql_line
+# def create_index(table: str, *args):
+#     sql_line = f"""CREATE UNIQUE INDEX {table}_idx ON {table} {args};"""
+#     return sql_line
 
-
+# if __name__ == "__main__":
+#     print(create_index('reg', 'date', 'name'))
