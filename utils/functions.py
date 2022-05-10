@@ -4,32 +4,6 @@ from utils.local_vars import admin_pass, cells_for_sum, bonus_table
 from loguru import logger
 
 
-def search_id(massiv, id):
-    """
-    Поиск айдишника В ДОКУМЕНТЕ РЕГИСТРАЦИИ
-    """
-    for i in range(len(massiv)):
-        if id == massiv[i][' ID']:
-            search = True
-            break
-        else:
-            search = False
-    return search
-
-
-def search_name(massiv, id):
-    """
-    Поиск имени В ДОКУМЕНТЕ РЕГИСТРАЦИИ
-    """
-    for i in range(len(massiv)):
-        if id == massiv[i][' ID']:
-            Name = massiv[i]['Name']
-            break
-        else:
-            i += 1
-    return Name
-
-
 def admin_search(admin_id):
     """
     Проверка админского айдишника
@@ -93,3 +67,7 @@ def bonus(balance):
             message = f"Остаток до бонуса {bonus_table[i]}% составляет {i - balance}$"
             break
     return message
+
+
+if __name__ == "__main__":
+    pass

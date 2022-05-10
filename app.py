@@ -12,10 +12,15 @@ from loguru import logger
 
 from utils.config import token
 from utils.parsing import parsing_id, parsing_doc
-from utils.functions import search_id, search_name, admin_search, sum_for_week, bonus
+from utils.functions import admin_search, sum_for_week, bonus
 from utils import messages as texts
 from utils.local_vars import available_work_buttons, available_admin_buttons
-from utils.db_requests import is_chat_id_exist, is_input_id_relevant
+from utils.db_requests import (
+    name_by_chat_id, 
+    name_by_input_id, 
+    update_chat_id_in_registration,
+    delete_from_registration,
+    )
 
 
 class OrderDeals(StatesGroup):
@@ -30,7 +35,7 @@ async def bot_start(message: types.Message):
 
     # Проверка на наличие chat_id в бд для реконнекта
     with sqlite3.connect("database.db") as conn:
-        result = is_chat_id_exist(conn, chat_id)
+        result = name_by_chat_id(conn, chat_id)
 
     # если есть в бд - восстанавливаем сессию
     if result:
@@ -40,6 +45,7 @@ async def bot_start(message: types.Message):
         await message.answer("Сессия восстановлена.", reply_markup=markup)
         logger.info(f"Сессия восстановлена для id {chat_id}")
         await OrderDeals.waiting_for_modeldeals.set()
+    
     # если нет в бд ожидаем ввод id
     else:
         await message.answer(texts.Hello, reply_markup=types.ReplyKeyboardRemove())
@@ -60,7 +66,7 @@ async def identification(message: types.Message, state: FSMContext):
 
         # Поиск введенного id  зарегестрированных в бд
         with sqlite3.connect("database.db") as conn:
-            validation_result = is_input_id_relevant(conn, input_id)
+            validation_result = name_by_input_id(conn, input_id)
 
         # Если нет айдишника в списке моделей, проверка на айдишник админа
         if not validation_result:
@@ -81,20 +87,16 @@ async def identification(message: types.Message, state: FSMContext):
                 await message.answer("ID не обнаружен. Попробуйте снова.")
                 await OrderDeals.waiting_for_ID.set()
         
-        # Введенный id найден в файле регистрации
+        # Введенный id найден в registration
         else:
-            # !!!!!Получаем имя модели по введенному id
+            # Получаем имя модели по введенному id
             name = validation_result[0]
             # id диалога
             chat_id = message.from_user.id
 
-            # !!!!!!!!!! заполняем бд для авторизации при ребуте (id беседы, id модели, имя модели)
-            
-            # with sqlite3.connect("database.db") as conn:
-            #     cursor = conn.cursor()
-            #     cursor.execute("""INSERT INTO logins VALUES (?, ?, ?)""",
-            #                    (chat_id, num, name))
-            #     conn.commit()
+            # Обновляем поле chat_id в бд для авторизации при ребуте
+            with sqlite3.connect("database.db") as conn:
+                update_chat_id_in_registration(conn, chat_id, input_id)
 
             # Добавляем клавиатуру с кнопками из списка
             markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
@@ -112,41 +114,48 @@ async def identification(message: types.Message, state: FSMContext):
 
 async def model_deals(message: types.Message, state: FSMContext):
     # парсинг из кэша
-    res = parsing_doc()
+    # res = parsing_doc()
+
     # недельный баланс обычно помещается в последнюю сотню строк выдачи
-    result = res[-100:]
+    # result = res[-100:]
 
-    dialog_id = message.from_user.id
+    chat_id = message.from_user.id
 
+    # Получаем имя для поиска результатов по датам и имени в main 
     with sqlite3.connect("database.db") as conn:
-        cursor = conn.cursor()
-        cursor.execute("SELECT name FROM logins WHERE chat_id = ?", (dialog_id,))
-        name = cursor.fetchone()
+        name = name_by_chat_id(conn, chat_id)
 
     try:
-        Name = name[0]
+        name = name[0]
+
+        # Если введен текст вместо нажатия кнопки
         if message.text.lower() not in available_work_buttons:
             await message.answer("Пожалуйста, выберите команду, используя клавиатуру ниже.")
             return
 
+        # Если нажато Узнать баланс
         if message.text.lower() == available_work_buttons[0]:
-            Balance = sum_for_week(result, Name)
-            await message.answer(f"Ваш текущий баланс {Balance:.2f} $")
+            
+            # balance = sum_for_week(result, name)
+            
+            await message.answer(f"Ваш текущий баланс balance $")
             return
 
+        # Если нажато Остаток до бонуса
         elif message.text.lower() == available_work_buttons[1]:
-            Balance = sum_for_week(result, Name)
-            await message.answer(bonus(Balance))
+            
+            # balance = sum_for_week(result, name)
+            
+            await message.answer("bonus(Balance)")
             return
 
+        # Если нажато Выйти из аккаунта
         elif message.text.lower() == available_work_buttons[2]:
 
-            conn = sqlite3.connect("database.db")
-            cursor = conn.cursor()
-            cursor.execute("DELETE FROM logins WHERE Name = ?", (Name,))
-            conn.commit()
-            conn.close()
-            logger.info(f"{Name} log out")
+            with sqlite3.connect("database.db") as conn:
+                delete_from_registration(conn, chat_id)
+
+            logger.info(f"{name} log out")
             await message.answer("Введите свой ID")
             await OrderDeals.waiting_for_ID.set()
 

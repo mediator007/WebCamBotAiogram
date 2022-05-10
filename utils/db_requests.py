@@ -1,20 +1,25 @@
-# class DBRequests(connection):
-    
-#     def __init__(self, connection):
-#         self.connection = connection
-    
-def is_chat_id_exist(connection, chat_id):
+
+def name_by_chat_id(connection, chat_id):
         cursor = connection.cursor()
         # Ищем имя модели по id беседы
-        cursor.execute("SELECT name FROM registration WHERE chat_id = ?", (chat_id,))
+        cursor.execute("""SELECT name FROM registration WHERE chat_id = ?""", (chat_id,))
         result = cursor.fetchone()
-        if result:
-            return True
-        else:
-            return False
+        return result
 
-def is_input_id_relevant(connection, input_id):
+
+def name_by_input_id(connection, input_id):
     cursor = connection.cursor()
-    cursor.execute("SELECT name FROM registration WHERE id = ?", (input_id,))
+    cursor.execute("""SELECT name FROM registration WHERE id = ?""", (input_id,))
     result = cursor.fetchone()
     return result
+
+
+def update_chat_id_in_registration(connection, chat_id, id):
+    cursor = connection.cursor()
+    cursor.execute("""UPDATE registration SET chat_id = ? WHERE id = ?""", (chat_id, id,))
+    connection.commit()
+
+def delete_from_registration(connection, chat_id, ):
+    cursor = connection.cursor()
+    cursor.execute("""UPDATE registration SET chat_id = NULL WHERE chat_id = ?""", (chat_id,))
+    connection.commit()
