@@ -9,9 +9,6 @@ from utils.config import main_file, registration_file
 
 
 class GDriveExport:
-    # def __init__(self, connection, state):
-    #     self.connection = connection
-    #     self.state = state
 
     @backoff()
     def export_registration(self) -> tuple:

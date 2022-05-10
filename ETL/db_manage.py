@@ -46,8 +46,9 @@ def create_registration():
     conn = sqlite3.connect("../database.db")
     cursor = conn.cursor()
     cursor.execute("""CREATE TABLE IF NOT EXISTS registration (
-        id INTEGER,
-        name TEXT NOT NULL);""")
+        id INTEGER UNIQUE,
+        name TEXT NOT NULL UNIQUE,
+        chat_id INTEGER);""")
     conn.close()
 
 

@@ -1,24 +1,21 @@
 import asyncio
+import sqlite3
+from typing import List
+
 from aiogram import Bot
 from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.types.bot_command import BotCommand
-import sqlite3
+from loguru import logger
+
 from utils.config import token
 from utils.parsing import parsing_id, parsing_doc
 from utils.functions import search_id, search_name, admin_search, sum_for_week, bonus
-from utils import texts
+from utils import messages as texts
 from utils.local_vars import available_work_buttons, available_admin_buttons
-from loguru import logger
-from typing import List
-
-conn = sqlite3.connect("database.db")
-cursor = conn.cursor()
-cursor.execute("""CREATE TABLE IF NOT EXISTS logins (chat_id, ID, Name)""")
-conn.commit()
-conn.close()
+from utils.db_requests import is_chat_id_exist, is_input_id_relevant
 
 
 class OrderDeals(StatesGroup):
@@ -29,20 +26,19 @@ class OrderDeals(StatesGroup):
 
 
 async def bot_start(message: types.Message):
-    registrationNum = message.from_user.id
+    chat_id = message.from_user.id
 
+    # Проверка на наличие chat_id в бд для реконнекта
     with sqlite3.connect("database.db") as conn:
-        cursor = conn.cursor()
-        # Ищем имя модели по id беседы
-        cursor.execute("SELECT name FROM logins WHERE chat_id = ?", (registrationNum,))
-        result = cursor.fetchone()
+        result = is_chat_id_exist(conn, chat_id)
+
     # если есть в бд - восстанавливаем сессию
     if result:
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
         for name in available_work_buttons:
             markup.add(name)
         await message.answer("Сессия восстановлена.", reply_markup=markup)
-        logger.info(f"Сессия восстановлена для id {registrationNum}")
+        logger.info(f"Сессия восстановлена для id {chat_id}")
         await OrderDeals.waiting_for_modeldeals.set()
     # если нет в бд ожидаем ввод id
     else:
@@ -51,22 +47,25 @@ async def bot_start(message: types.Message):
 
 
 async def identification(message: types.Message, state: FSMContext):
-    # Все id из файла с доступами
-    res: list = parsing_id()
 
     try:
         # введенный id
         input_id = message.text
+
         if not input_id.isdigit():
             await message.answer("Id должен быть числом")
             await OrderDeals.waiting_for_ID.set()
 
-        num = int(input_id)
-        # Поиск введенного id по массиву всех зарегестрированных id
-        search = search_id(res, num)
+        input_id = int(input_id)
+
+        # Поиск введенного id  зарегестрированных в бд
+        with sqlite3.connect("database.db") as conn:
+            validation_result = is_input_id_relevant(conn, input_id)
+
         # Если нет айдишника в списке моделей, проверка на айдишник админа
-        if not search:
-            admin_search_res = admin_search(num)
+        if not validation_result:
+            admin_search_res = admin_search(input_id)
+
             # Если айдишник админа - добавляем кнопки, улетаем в функцию админа
             if admin_search_res:
                 markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
@@ -75,29 +74,33 @@ async def identification(message: types.Message, state: FSMContext):
                 logger.info(f"Начата сессия администратора")
                 await message.answer("Сессия администратора", reply_markup=markup)
                 await OrderDeals.waiting_for_admindeals.set()
+            
             # Если не модель и не админ - повторяем ввод айдишника
             else:
-                logger.warning(f"Неверный ввод id - {num}")
+                logger.warning(f"Неверный ввод id - {input_id}")
                 await message.answer("ID не обнаружен. Попробуйте снова.")
                 await OrderDeals.waiting_for_ID.set()
+        
         # Введенный id найден в файле регистрации
         else:
-            # Получаем имя модели по введенному id
-            name = search_name(res, num)
+            # !!!!!Получаем имя модели по введенному id
+            name = validation_result[0]
             # id диалога
-            registrationNum = message.from_user.id
+            chat_id = message.from_user.id
 
-            # заполняем бд для авторизации при ребуте (id беседы, id модели, имя модели)
-            with sqlite3.connect("database.db") as conn:
-                cursor = conn.cursor()
-                cursor.execute("""INSERT INTO logins VALUES (?, ?, ?)""",
-                               (registrationNum, num, name))
-                conn.commit()
+            # !!!!!!!!!! заполняем бд для авторизации при ребуте (id беседы, id модели, имя модели)
+            
+            # with sqlite3.connect("database.db") as conn:
+            #     cursor = conn.cursor()
+            #     cursor.execute("""INSERT INTO logins VALUES (?, ?, ?)""",
+            #                    (chat_id, num, name))
+            #     conn.commit()
+
             # Добавляем клавиатуру с кнопками из списка
             markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
             for button in available_work_buttons:
                 markup.add(button)
-            logger.info(f"Вход в учетную запись {name}")
+            logger.info(f"{name} log in")
             await message.answer(f"Привет {name}, ты зарегистрирована.", reply_markup=markup)
             await OrderDeals.waiting_for_modeldeals.set()
 
@@ -143,7 +146,7 @@ async def model_deals(message: types.Message, state: FSMContext):
             cursor.execute("DELETE FROM logins WHERE Name = ?", (Name,))
             conn.commit()
             conn.close()
-
+            logger.info(f"{Name} log out")
             await message.answer("Введите свой ID")
             await OrderDeals.waiting_for_ID.set()
 
@@ -254,4 +257,5 @@ async def main():
 
 if __name__ == '__main__':
     logger.add("bot_debug.log", format="{time} {level} {message}", level="INFO", rotation="1 MB")
+    logger.info("Bot start")
     asyncio.run(main())

@@ -2,6 +2,7 @@ from functools import wraps
 import time
 from loguru import logger
 
+logger.add("../debug.log", format="{time} {level} {message}", level="INFO", rotation="1 MB")
 
 def backoff(start_sleep_time=0.1, factor=2, border_sleep_time=10, time_monitoring=None):
     backoff.counter = 0
@@ -31,7 +32,7 @@ def backoff(start_sleep_time=0.1, factor=2, border_sleep_time=10, time_monitorin
 
 if __name__ == '__main__':
     
-    logger.add("debug.log", format="{time} {level} {message}", level="INFO", rotation="1 MB")
+    
     @backoff(time_monitoring=True)
     def print_func():
         print("Try to connect...")
