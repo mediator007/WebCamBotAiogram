@@ -31,6 +31,9 @@ class OrderDeals(StatesGroup):
 
 
 async def bot_start(message: types.Message):
+    """
+    Функция первоначального запуска бота или ребута
+    """
     chat_id = message.from_user.id
 
     # Проверка на наличие chat_id в бд для реконнекта
@@ -53,6 +56,9 @@ async def bot_start(message: types.Message):
 
 
 async def identification(message: types.Message, state: FSMContext):
+    """
+    Функция валидации введенного id
+    """
 
     try:
         # введенный id
@@ -102,22 +108,22 @@ async def identification(message: types.Message, state: FSMContext):
             markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
             for button in available_work_buttons:
                 markup.add(button)
+
             logger.info(f"{name} log in")
             await message.answer(f"Привет {name}, ты зарегистрирована.", reply_markup=markup)
             await OrderDeals.waiting_for_modeldeals.set()
 
-    except Exception as e:
-        logger.error(f"Ошибка ввода id - {e}")
+    except Exception as exc:
+        logger.error(f"Ошибка ввода id - {exc}")
         await message.answer(texts.Hello, reply_markup=types.ReplyKeyboardRemove())
         await OrderDeals.waiting_for_ID.set()
 
 
 async def model_deals(message: types.Message, state: FSMContext):
-    # парсинг из кэша
-    # res = parsing_doc()
-
-    # недельный баланс обычно помещается в последнюю сотню строк выдачи
-    # result = res[-100:]
+    """
+    Функция обработки команд модели 
+    (Запрос баланса, остаток до бонуса, выход из аккаунта)
+    """
 
     chat_id = message.from_user.id
 
@@ -152,6 +158,7 @@ async def model_deals(message: types.Message, state: FSMContext):
         # Если нажато Выйти из аккаунта
         elif message.text.lower() == available_work_buttons[2]:
 
+            # Удаляем 
             with sqlite3.connect("database.db") as conn:
                 delete_from_registration(conn, chat_id)
 
@@ -166,6 +173,9 @@ async def model_deals(message: types.Message, state: FSMContext):
 
 
 async def admin_deals(message: types.Message, state: FSMContext):
+    """
+    Функция обработки комманд от администратора
+    """
     if message.text.lower() not in available_admin_buttons:
         await message.answer("Пожалуйста, выберите команду, используя клавиатуру ниже.")
         return
