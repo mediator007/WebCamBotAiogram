@@ -1,5 +1,6 @@
-
-from aiogram import Dispatcher, Bot
+import asyncio
+from aiogram.dispatcher import Dispatcher
+from aiogram import Bot
 from aiogram.types import Message, CallbackQuery, ReplyKeyboardRemove, ReplyKeyboardMarkup
 from aiogram.utils import executor
 from aiogram.dispatcher.filters import Text
@@ -10,7 +11,7 @@ from utils.config import token
 API_TOKEN = token
 
 # Configure logging
-logging.basicConfig(level=logging.INFO)
+# logging.basicConfig(level=logging.INFO)
 
 # Initialize bot and dispatcher
 bot = Bot(token=API_TOKEN)
@@ -34,7 +35,9 @@ async def nav_cal_handler(message: Message):
 # simple calendar usage
 @dp.callback_query_handler(simple_cal_callback.filter())
 async def process_simple_calendar(callback_query: CallbackQuery, callback_data: dict):
+    print(callback_query, callback_data)
     selected, date = await SimpleCalendar().process_selection(callback_query, callback_data)
+    print(date)
     if selected:
         await callback_query.message.answer(
             f'You selected {date.strftime("%d/%m/%Y")}',
@@ -58,5 +61,10 @@ async def process_dialog_calendar(callback_query: CallbackQuery, callback_data: 
         )
 
 
+async def main():
+    # register_handlers_deals(dp)
+    # await set_commands_model(bot)
+    await dp.start_polling()
+
 if __name__ == '__main__':
-    executor.start_polling(dp, skip_updates=True)
+    asyncio.run(main())
