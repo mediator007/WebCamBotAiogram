@@ -8,6 +8,7 @@ from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.types.bot_command import BotCommand
+from aiogram_calendar import simple_cal_callback, SimpleCalendar
 from loguru import logger
 
 from utils.config import token
@@ -28,6 +29,7 @@ class OrderDeals(StatesGroup):
     waiting_for_admindeals = State()
     waiting_for_modeldeals = State()
     waiting_for_modeldelete = State()
+    waiting_for_date = State() # Calendar
 
 
 async def bot_start(message: types.Message):
@@ -181,21 +183,8 @@ async def admin_deals(message: types.Message, state: FSMContext):
         return
 
     elif message.text.lower() == available_admin_buttons[0]:
-        await message.answer("Список зарегестрированных моделей:")
-
-        with sqlite3.connect("database.db") as conn:
-            cursor = conn.cursor()
-            cursor.execute("SELECT name FROM logins")
-            result = cursor.fetchall()
-
-        try:
-            if result[0] is not None:
-                for i in range(len(result)):
-                    await message.answer(result[i][0])
-                    await OrderDeals.waiting_for_admindeals.set()
-        except IndexError:
-            await message.answer('Нет зарегестрированных моделей')
-            await OrderDeals.waiting_for_admindeals.set()
+        await message.answer("Список зарегестрированных моделей:", reply_markup=await SimpleCalendar().start_calendar())
+        await OrderDeals.waiting_for_date.set()
 
     elif message.text.lower() == available_admin_buttons[1]:
         await message.answer("Введите имя")
@@ -204,6 +193,14 @@ async def admin_deals(message: types.Message, state: FSMContext):
     elif message.text.lower() == available_admin_buttons[2]:
         await message.answer("Введите свой ID")
         await OrderDeals.waiting_for_ID.set()
+
+
+async def date(callback_query, callback_data: dict):
+    print("!!!!!!!!!!!")
+    selected, date = await SimpleCalendar().process_selection(callback_query, callback_data)
+    if selected:
+        await callback_query.message.answer(
+            f'You selected {date.strftime("%d/%m/%Y")}') # reply_markup=start_kb)
 
 
 async def model_delete(message: types.Message, state: FSMContext):
@@ -253,7 +250,8 @@ def register_handlers_deals(dp: Dispatcher):
     dp.register_message_handler(model_deals, state=OrderDeals.waiting_for_modeldeals)
     dp.register_message_handler(admin_deals, state=OrderDeals.waiting_for_admindeals)
     dp.register_message_handler(model_delete, state=OrderDeals.waiting_for_modeldelete)
-
+    # Calendar
+    dp.callback_query_handler(simple_cal_callback.filter(), run_task=date, state=OrderDeals.waiting_for_date) 
 
 # Регистрация команд, отображаемых в интерфейсе Telegram
 async def set_commands_model(bot: Bot):

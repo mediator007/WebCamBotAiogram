@@ -1,4 +1,5 @@
 aiogram==2.20
+aiogram_calendar
 gspread==5.3.2
 loguru==0.6.0
 schedule==1.1.0

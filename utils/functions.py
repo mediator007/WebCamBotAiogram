@@ -2,7 +2,7 @@ import datetime
 import time
 from utils.local_vars import admin_pass, cells_for_sum, bonus_table
 from loguru import logger
-from db_requests import week_result
+# from db_requests import week_result
 
 
 def admin_search(admin_id):
