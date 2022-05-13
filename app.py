@@ -190,7 +190,7 @@ async def admin_deals(message: types.Message, state: FSMContext):
 
     elif message.text.lower() == available_admin_buttons[0]:
         await message.answer("Список зарегестрированных моделей:", reply_markup=await SimpleCalendar().start_calendar())
-        # await OrderDeals.waiting_for_date.set()
+        await OrderDeals.waiting_for_date.set()
 
     # elif message.text.lower() == available_admin_buttons[1]:
     #     await message.answer("Введите имя")
@@ -201,7 +201,7 @@ async def admin_deals(message: types.Message, state: FSMContext):
     #     await OrderDeals.waiting_for_ID.set()
 
 
-@dp.callback_query_handler(simple_cal_callback.filter())
+@dp.callback_query_handler(simple_cal_callback.filter(), state=OrderDeals.waiting_for_date)
 async def process_simple_calendar(callback_query: CallbackQuery, callback_data: dict):
     print(callback_query, callback_data)
     selected, date = await SimpleCalendar().process_selection(callback_query, callback_data)
