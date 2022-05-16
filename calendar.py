@@ -1,5 +1,6 @@
 
-from aiogram import Dispatcher, Bot
+from aiogram import Bot
+from aiogram import Dispatcher
 from aiogram.types import Message, CallbackQuery, ReplyKeyboardRemove, ReplyKeyboardMarkup
 from aiogram.utils import executor
 from aiogram.dispatcher.filters import Text
