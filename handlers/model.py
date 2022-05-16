@@ -82,7 +82,15 @@ async def model_deals(message):
         await OrderDeals.waiting_for_ID.set()
 
 
-@dp.callback_query_handler(text='Jasmin', state=OrderDeals.waiting_for_report)
+@dp.callback_query_handler(text=available_sites_buttons[0], state=OrderDeals.waiting_for_report)
+async def report_by_site(callback_query):
+
+    answer_data = callback_query.data
+    await callback_query.answer(f'You answered with {answer_data!r}')
+    await OrderDeals.waiting_for_modeldeals.set()
+
+
+@dp.callback_query_handler(text=available_sites_buttons[1], state=OrderDeals.waiting_for_report)
 async def report_by_site(callback_query):
 
     answer_data = callback_query.data
