@@ -13,6 +13,7 @@ class OrderDeals(StatesGroup):
     waiting_for_modeldelete = State()
     waiting_for_date = State()
     waiting_for_report = State()
+    waiting_for_report_sum = State()
 
 
 def admin_search(admin_id):

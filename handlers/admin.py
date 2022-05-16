@@ -32,13 +32,13 @@ async def admin_deals(message: types.Message, state):
         await message.answer("Список зарегестрированных моделей:", reply_markup=await SimpleCalendar().start_calendar())
         await OrderDeals.waiting_for_date.set()
 
-    elif message.text.lower() == available_admin_buttons[1]:
-        await message.answer("Введите имя")
-        await OrderDeals.waiting_for_modeldelete.set()
+    # elif message.text.lower() == available_admin_buttons[1]:
+    #     await message.answer("Введите имя")
+    #     await OrderDeals.waiting_for_modeldelete.set()
 
-    elif message.text.lower() == available_admin_buttons[2]:
-        await message.answer("Введите свой ID")
-        await OrderDeals.waiting_for_ID.set()
+    # elif message.text.lower() == available_admin_buttons[2]:
+    #     await message.answer("Введите свой ID")
+    #     await OrderDeals.waiting_for_ID.set()
 
 
 @dp.callback_query_handler(simple_cal_callback.filter(), state=OrderDeals.waiting_for_date)

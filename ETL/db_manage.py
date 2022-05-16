@@ -2,9 +2,9 @@ import sqlite3
 
 
 def drop_table():
-    conn = sqlite3.connect("etl_database.db")
+    conn = sqlite3.connect("database.db")
     cursor = conn.cursor()
-    cursor.execute("DROP TABLE registration")
+    cursor.execute("DROP TABLE main")
     conn.commit()
     conn.close()
 
@@ -21,7 +21,7 @@ def delete_from_logins():
 def select_all_logins():
     conn = sqlite3.connect("../database.db")
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM main WHERE (date > '2021-12-12') LIMIT 5")
+    cursor.execute("SELECT * FROM registration LIMIT 5")
     result = cursor.fetchall()
     print(result)
     conn.close()

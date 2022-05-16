@@ -42,7 +42,7 @@ def register_handlers_deals(dp: Dispatcher):
     dp.register_message_handler(callback=identification, state=OrderDeals.waiting_for_ID)
     dp.register_message_handler(callback=model_deals, state=OrderDeals.waiting_for_modeldeals)
     dp.register_message_handler(callback=admin_deals, state=OrderDeals.waiting_for_admindeals)
-    dp.register_message_handler(callback=model_delete, state=OrderDeals.waiting_for_modeldelete)
+    # dp.register_message_handler(callback=model_delete, state=OrderDeals.waiting_for_modeldelete)
 
 
 # Регистрация команд, отображаемых в интерфейсе Telegram

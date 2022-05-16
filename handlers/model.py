@@ -1,12 +1,15 @@
 import sqlite3
 from loguru import  logger
 from aiogram import types
+from aiogram.utils.callback_data import CallbackData
+from datetime import date
 
 from utils.db_requests import (
     name_by_chat_id,
     name_by_input_id,
     update_chat_id_in_registration,
     delete_from_registration,
+    add_report,
     )
 
 from utils.local_vars import (
@@ -16,6 +19,27 @@ from utils.local_vars import (
 
 from utils.functions import OrderDeals
 from utils.settings import dp, bot
+
+current_date = date.today()
+# print(current_date)
+
+sites_cb = CallbackData('vote', 'action')  # vote:<action>
+
+def get_keyboard():
+    keyboard_markup = types.InlineKeyboardMarkup(row_width=1)
+    row_btns_1 = (
+        types.InlineKeyboardButton(available_sites_buttons[0], callback_data=sites_cb.new(action=available_sites_buttons[0])),
+        types.InlineKeyboardButton(available_sites_buttons[1], callback_data=sites_cb.new(action=available_sites_buttons[1])),
+        types.InlineKeyboardButton(available_sites_buttons[2], callback_data=sites_cb.new(action=available_sites_buttons[2])),
+        )
+    row_btns_2 = (
+        types.InlineKeyboardButton(available_sites_buttons[3], callback_data=sites_cb.new(action=available_sites_buttons[3])),
+        types.InlineKeyboardButton(available_sites_buttons[4], callback_data=sites_cb.new(action=available_sites_buttons[4])),
+        types.InlineKeyboardButton(available_sites_buttons[5], callback_data=sites_cb.new(action=available_sites_buttons[5])),
+        )
+    keyboard_markup.row(*row_btns_1)
+    keyboard_markup.row(*row_btns_2)
+    return keyboard_markup
 
 async def model_deals(message):
     """
@@ -39,13 +63,7 @@ async def model_deals(message):
         # Если нажато Отправить отчет
         if message.text.lower() == available_work_buttons[0]:
             
-            keyboard_markup = types.InlineKeyboardMarkup(row_width=1)
-            row_btns_1 = (types.InlineKeyboardButton(text, callback_data=text) for text in available_sites_buttons[:3])
-            row_btns_2 = (types.InlineKeyboardButton(text, callback_data=text) for text in available_sites_buttons[3:])
-            keyboard_markup.row(*row_btns_1)
-            keyboard_markup.row(*row_btns_2)
-            
-            await message.answer(f"Выберите сайт", reply_markup=keyboard_markup)
+            await message.answer(f"Выберите сайт", reply_markup=get_keyboard())
             await OrderDeals.waiting_for_report.set()
 
         # Если нажато Узнать баланс
@@ -82,17 +100,46 @@ async def model_deals(message):
         await OrderDeals.waiting_for_ID.set()
 
 
-@dp.callback_query_handler(text=available_sites_buttons[0], state=OrderDeals.waiting_for_report)
-async def report_by_site(callback_query):
+@dp.callback_query_handler(sites_cb.filter(action=[
+    available_sites_buttons[0], 
+    available_sites_buttons[1],
+    available_sites_buttons[2],
+    available_sites_buttons[3],
+    available_sites_buttons[4],
+    available_sites_buttons[5]
+    ]), state=OrderDeals.waiting_for_report)
+async def report_by_site(callback_query, state):
+    """
+    Функция принимает сайт для записи суммы
+    """
 
-    answer_data = callback_query.data
-    await callback_query.answer(f'You answered with {answer_data!r}')
-    await OrderDeals.waiting_for_modeldeals.set()
+    answer_data = callback_query.data[5:]
+    await state.update_data(chosen_site=answer_data.lower())
+    await callback_query.answer(f'Введите сумму для {answer_data}')
+    await OrderDeals.waiting_for_report_sum.set()
 
+@dp.message_handler(state=OrderDeals.waiting_for_report_sum)
+async def report_sum(message, state):
+    """
+    Функция принимает сумму для записи в бд
+    """
+    report_sum = message.text
+    chat_id = message.from_user.id
+    try:
+        report_sum = int(message.text)
+        site = await state.get_data()
+        site = site['chosen_site']
 
-@dp.callback_query_handler(text=available_sites_buttons[1], state=OrderDeals.waiting_for_report)
-async def report_by_site(callback_query):
+        with sqlite3.connect("database.db") as conn:
+            name = name_by_chat_id(conn, chat_id)
 
-    answer_data = callback_query.data
-    await callback_query.answer(f'You answered with {answer_data!r}')
-    await OrderDeals.waiting_for_modeldeals.set()
+            name = name[0]
+            add_report(conn, current_date, name, site, report_sum)
+
+        await message.answer(f"В {site} записано {report_sum}")
+        await OrderDeals.waiting_for_modeldeals.set() 
+    
+    except Exception as e:
+        logger.error(f"Ошибка ввода суммы: {e}")
+        await message.answer("Сумма должна быть числом")
+        await OrderDeals.waiting_for_modeldeals.set()
