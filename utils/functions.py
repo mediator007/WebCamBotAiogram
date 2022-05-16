@@ -3,6 +3,15 @@ import time
 from utils.local_vars import admin_pass, cells_for_sum, bonus_table
 from loguru import logger
 # from db_requests import week_result
+from aiogram.dispatcher.filters.state import State, StatesGroup
+
+
+class OrderDeals(StatesGroup):
+    waiting_for_ID = State()
+    waiting_for_admindeals = State()
+    waiting_for_modeldeals = State()
+    waiting_for_modeldelete = State()
+    waiting_for_date = State()
 
 
 def admin_search(admin_id):

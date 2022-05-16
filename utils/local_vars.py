@@ -14,5 +14,6 @@ bonus_table = {
     550: 56, 600: 57, 650: 58, 700: 59, 750: 60
 }
 
-available_work_buttons = ["узнать баланс", "остаток до бонуса", "выйти из аккаунта"]
+available_work_buttons = ["отправить отчет", "узнать баланс", "остаток до бонуса", "выйти из аккаунта"]
+available_sites_buttons = ['Chaturbate', 'Stripchat', 'Jasmin', 'Streamate', 'CamSoda', 'MFC']
 available_admin_buttons = ["список моделей", "удалить модель", "выйти из аккаунта"]
