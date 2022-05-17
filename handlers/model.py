@@ -21,8 +21,9 @@ from utils.local_vars import (
 from utils.functions import OrderDeals, sum_for_week
 from utils.settings import dp, bot
 
+logger.add("bot_debug.log", format="{time} {level} {message}", level="INFO", rotation="1 MB")
+
 current_date = date.today()
-# print(current_date)
 
 sites_cb = CallbackData('vote', 'action')  # vote:<action>
 
@@ -63,13 +64,13 @@ async def model_deals(message):
 
         # Если нажато Отправить отчет
         if message.text.lower() == available_work_buttons[0]:
-            
+            logger.info(f"{name} отправление отчета")
             await message.answer(f"Выберите сайт", reply_markup=get_keyboard())
             await OrderDeals.waiting_for_report.set()
 
         # Если нажато Узнать баланс
         if message.text.lower() == available_work_buttons[1]:
-
+            logger.info(f"{name} запрос баланса")
             with sqlite3.connect("database.db") as conn:
                 rows = rows_for_week(conn, name)
             
@@ -82,7 +83,7 @@ async def model_deals(message):
         elif message.text.lower() == available_work_buttons[2]:
 
             # balance = sum_for_week(result, name)
-
+            logger.info(f"{name} запрос остатка до бонуса")
             await message.answer("bonus(Balance)")
             return
 
@@ -98,8 +99,8 @@ async def model_deals(message):
             await OrderDeals.waiting_for_ID.set()
 
     except Exception as e:
-        print(e)
-        await message.answer('Возникли проблемы. Обратитесь к администратору.')
+        logger.error(f"Ошибка в model_deals: {e}")
+        await message.answer('Возникли проблемы. Попробуйте перезапустить бот.')
         await message.answer("Введите свой ID")
         await OrderDeals.waiting_for_ID.set()
 
@@ -116,8 +117,8 @@ async def report_by_site(callback_query, state):
     """
     Функция принимает сайт для записи суммы
     """
-
     answer_data = callback_query.data[5:]
+    logger.info(f"Для отчета выбран {answer_data}")
     await state.update_data(chosen_site=answer_data.lower())
     await callback_query.answer(f'Введите сумму для {answer_data}')
     await OrderDeals.waiting_for_report_sum.set()
@@ -139,7 +140,7 @@ async def report_sum(message, state):
             name = name_by_chat_id(conn, chat_id)
             name = name[0]
             add_report(conn, current_date, name, site, report_sum)
-
+        logger.info(f"{name} занесение в БД {report_sum} в {site} ")
         await message.answer(f"В {site} записано {report_sum}")
         await OrderDeals.waiting_for_modeldeals.set() 
     
