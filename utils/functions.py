@@ -2,11 +2,13 @@ import datetime
 import time
 from utils.local_vars import admin_pass, cells_for_sum, bonus_table
 from loguru import logger
-# from db_requests import week_result
 from aiogram.dispatcher.filters.state import State, StatesGroup
 
 
 class OrderDeals(StatesGroup):
+    """
+    Состояния для конечного автомата
+    """
     waiting_for_ID = State()
     waiting_for_admindeals = State()
     waiting_for_modeldeals = State()
@@ -14,17 +16,6 @@ class OrderDeals(StatesGroup):
     waiting_for_date = State()
     waiting_for_report = State()
     waiting_for_report_sum = State()
-
-
-def admin_search(admin_id):
-    """
-    Проверка админского айдишника
-    """
-    if admin_id == admin_pass:
-        search_res = True
-    else:
-        search_res = False
-    return search_res
 
 
 def sum_for_week(rows):
@@ -45,21 +36,17 @@ def sum_for_week(rows):
             ) +
             row[6] + 
             row[7]
-            ) * 0.5  # Добавить остальные поля!!!
+            ) * 0.5  # Добавить остальные поля
         week_sum.append(sum_for_day)
     return sum(week_sum)
 
 
 def bonus(balance):
     """
-
+    Расчет остатка до бонуса
     """
     for i in range(300, 800, 50):
         if i > balance:
-            message = f"Остаток до бонуса {bonus_table[i]}% составляет {i - balance}$"
+            message = f"Остаток до бонуса {bonus_table[i]}% составляет {i - balance:.2f}$"
             break
     return message
-
-
-if __name__ == "__main__":
-    pass

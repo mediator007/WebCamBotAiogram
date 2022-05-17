@@ -52,9 +52,18 @@ def create_registration():
     conn.close()
 
 
-if __name__ == "__main__":
+def create_admin_registration():
+    conn = sqlite3.connect("../database.db")
+    cursor = conn.cursor()
+    cursor.execute("""CREATE TABLE IF NOT EXISTS admin_registration (
+        chat_id INTEGER);""")
+    conn.close()
+
+
+# if __name__ == "__main__":
     # delete_from_logins()
     # create_main()
     # create_registration()
-    select_all_logins()
+    # create_admin_registration()
+    # select_all_logins()
     # drop_table()

@@ -2,7 +2,7 @@ import sqlite3
 from aiogram import Dispatcher, types
 from loguru import logger
 
-from utils.functions import OrderDeals, admin_search
+from utils.functions import OrderDeals
 from utils.db_requests import name_by_input_id, name_by_chat_id
 from utils.local_vars import available_admin_buttons, available_work_buttons
 from utils.db_requests import update_chat_id_in_registration

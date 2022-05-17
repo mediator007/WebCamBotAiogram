@@ -2,10 +2,10 @@ import sqlite3
 from aiogram import Dispatcher, types
 from loguru import logger
 
-from utils.functions import OrderDeals, admin_search
+from utils.functions import OrderDeals
 from utils.db_requests import name_by_input_id
-from utils.local_vars import available_admin_buttons, available_work_buttons
-from utils.db_requests import update_chat_id_in_registration
+from utils.local_vars import available_admin_buttons, available_work_buttons, admin_pass
+from utils.db_requests import update_chat_id_in_registration, add_admin_to_db
 from utils import messages as texts
 
 logger.add("bot_debug.log", format="{time} {level} {message}", level="INFO", rotation="1 MB")
@@ -32,10 +32,12 @@ async def identification(message):
 
         # Если нет айдишника в списке моделей, проверка на айдишник админа
         if not validation_result:
-            admin_search_res = admin_search(input_id)
+            admin_search_res = lambda admin_pass, input_id: admin_pass == input_id
 
             # Если айдишник админа - добавляем кнопки, улетаем в функцию админа
             if admin_search_res:
+                chat_id = message.from_user.id
+                add_admin_to_db(chat_id)
                 markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
                 for name in available_admin_buttons:
                     markup.add(name)

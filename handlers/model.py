@@ -11,6 +11,7 @@ from utils.db_requests import (
     delete_from_registration,
     add_report,
     rows_for_week,
+    get_admin_list,
     )
 
 from utils.local_vars import (
@@ -18,7 +19,7 @@ from utils.local_vars import (
     available_sites_buttons,
     )
 
-from utils.functions import OrderDeals, sum_for_week
+from utils.functions import OrderDeals, sum_for_week, bonus
 from utils.settings import dp, bot
 
 logger.add("bot_debug.log", format="{time} {level} {message}", level="INFO", rotation="1 MB")
@@ -76,21 +77,23 @@ async def model_deals(message):
             
             result = sum_for_week(rows)
 
-            await message.answer(f"Ваш текущий баланс {result} $")
+            await message.answer(f"Ваш текущий баланс {result:.2f} $")
             return
 
         # Если нажато Остаток до бонуса
         elif message.text.lower() == available_work_buttons[2]:
-
-            # balance = sum_for_week(result, name)
+            with sqlite3.connect("database.db") as conn:
+                rows = rows_for_week(conn, name)
+            result = sum_for_week(rows)
+            bonus_message = bonus(result)
             logger.info(f"{name} запрос остатка до бонуса")
-            await message.answer("bonus(Balance)")
+            await message.answer(f"{bonus_message}")
             return
 
         # Если нажато Выйти из аккаунта
         elif message.text.lower() == available_work_buttons[3]:
 
-            # Удаляем
+            # Удаляем chat_id из registration
             with sqlite3.connect("database.db") as conn:
                 delete_from_registration(conn, chat_id)
 
@@ -140,9 +143,16 @@ async def report_sum(message, state):
             name = name_by_chat_id(conn, chat_id)
             name = name[0]
             add_report(conn, current_date, name, site, report_sum)
+
+        # Дублирование отчета админам из БД
+        admin_list = get_admin_list()
+        for admin in admin_list:
+            logger.info(f"Отчет отправлен админу {admin[0]}")
+            await bot.send_message(admin[0], f"{name} - {site} - {report_sum}")
+
         logger.info(f"{name} занесение в БД {report_sum} в {site} ")
         await message.answer(f"В {site} записано {report_sum}")
-        await OrderDeals.waiting_for_modeldeals.set() 
+        await OrderDeals.waiting_for_modeldeals.set()
     
     except Exception as e:
         logger.error(f"Ошибка ввода суммы: {e}")

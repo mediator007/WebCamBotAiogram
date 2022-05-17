@@ -34,7 +34,7 @@ def update_chat_id_in_registration(connection, chat_id, id):
     connection.commit()
 
 
-def delete_from_registration(connection, chat_id, ):
+def delete_from_registration(connection, chat_id):
     """
     Log out для модели
     """
@@ -57,11 +57,12 @@ def add_report(connection, current_date, name, site, value):
     cursor = connection.cursor()
     check = cursor.execute("""SELECT * FROM main WHERE date = ? AND name = ?""", (current_date, name))
     check = cursor.fetchall()
+    # If was any reports in CURRENT dat
     if check:
         line = f"""UPDATE main SET {site} = {value} WHERE date = ? AND name = ?"""
-        # UPDATE main SET chaturbate  = 777 WHERE date = "2022-05-04 00:00:00" AND  name = "Lisa";
         cursor.execute(line, (current_date, name,))
         connection.commit()
+    # If its first report by CURRENT day
     else:
         line = f"""INSERT INTO main (date, name, {site}) VALUES (?, ?, ?)"""
         cursor.execute(line, (current_date, name, value))
@@ -79,9 +80,39 @@ def rows_for_week(connection, name):
     result = cursor.fetchall()
     return result
 
-# if __name__ == "__main__":
-#     current_date = date.today()
-#     print(current_date)
-#     with sqlite3.connect("../database.db") as conn:
-#         add_report(conn, current_date, "Marzia", "jasmin", 123)
-#         print(res)
+
+def add_admin_to_db(chat_id):
+    """
+    Add admin chat_id to DB(admin_registration) for forwarding reports from models
+    """
+    sql_request = f"""INSERT INTO admin_registration (chat_id) VALUES (?)"""
+    execute_function(sql_request, chat_id)
+
+
+def delete_admin_from_db(chat_id):
+    """
+    Delete admin chat_id from DB(admin_registration) for stop forwarding reports from models
+    """
+    sql_request = f"""DELETE FROM admin_registration WHERE chat_id = ?;"""
+    execute_function(sql_request, chat_id)
+
+
+def get_admin_list():
+    sql_request = """SELECT chat_id FROM admin_registration;"""
+    result = return_function(sql_request)
+    return result
+
+
+def execute_function(sql_request, *args):
+    with sqlite3.connect("./database.db") as conn:
+        cursor = conn.cursor()
+        cursor.execute(sql_request, args)
+        conn.commit()
+
+
+def return_function(sql_request, *args):
+    with sqlite3.connect("./database.db") as conn:
+        cursor = conn.cursor()
+        cursor.execute(sql_request, args)
+        result = cursor.fetchall()
+        return result

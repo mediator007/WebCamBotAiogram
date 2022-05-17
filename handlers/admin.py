@@ -9,6 +9,8 @@ from utils.db_requests import (
     name_by_input_id,
     update_chat_id_in_registration,
     delete_from_registration,
+    delete_admin_from_db,
+    get_admin_list
     )
 
 from utils.local_vars import (
@@ -36,9 +38,11 @@ async def admin_deals(message: types.Message, state):
     #     await message.answer("Введите имя")
     #     await OrderDeals.waiting_for_modeldelete.set()
 
-    # elif message.text.lower() == available_admin_buttons[2]:
-    #     await message.answer("Введите свой ID")
-    #     await OrderDeals.waiting_for_ID.set()
+    elif message.text.lower() == available_admin_buttons[-1]:
+        chat_id = message.from_user.id
+        delete_admin_from_db(chat_id)
+        await message.answer("Введите свой ID")
+        await OrderDeals.waiting_for_ID.set()
 
 
 @dp.callback_query_handler(simple_cal_callback.filter(), state=OrderDeals.waiting_for_date)
