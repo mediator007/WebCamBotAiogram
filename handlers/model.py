@@ -10,6 +10,7 @@ from utils.db_requests import (
     update_chat_id_in_registration,
     delete_from_registration,
     add_report,
+    rows_for_week,
     )
 
 from utils.local_vars import (
@@ -17,7 +18,7 @@ from utils.local_vars import (
     available_sites_buttons,
     )
 
-from utils.functions import OrderDeals
+from utils.functions import OrderDeals, sum_for_week
 from utils.settings import dp, bot
 
 current_date = date.today()
@@ -69,9 +70,12 @@ async def model_deals(message):
         # Если нажато Узнать баланс
         if message.text.lower() == available_work_buttons[1]:
 
-            # balance = sum_for_week(result, name)
+            with sqlite3.connect("database.db") as conn:
+                rows = rows_for_week(name)
+            
+            result = sum_for_week(rows)
 
-            await message.answer(f"Ваш текущий баланс balance $")
+            await message.answer(f"Ваш текущий баланс {result} $")
             return
 
         # Если нажато Остаток до бонуса
@@ -118,6 +122,7 @@ async def report_by_site(callback_query, state):
     await callback_query.answer(f'Введите сумму для {answer_data}')
     await OrderDeals.waiting_for_report_sum.set()
 
+
 @dp.message_handler(state=OrderDeals.waiting_for_report_sum)
 async def report_sum(message, state):
     """
@@ -132,9 +137,8 @@ async def report_sum(message, state):
 
         with sqlite3.connect("database.db") as conn:
             name = name_by_chat_id(conn, chat_id)
-
             name = name[0]
-            add_report(conn, current_date, name, site, report_sum)
+            await add_report(conn, current_date, name, site, report_sum)
 
         await message.answer(f"В {site} записано {report_sum}")
         await OrderDeals.waiting_for_modeldeals.set() 

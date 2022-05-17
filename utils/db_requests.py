@@ -2,6 +2,8 @@ import sqlite3
 # sqlite3 -column -header database.db
 
 from datetime import date
+import datetime
+import time
 
 def name_by_chat_id(connection, chat_id):
     """
@@ -47,6 +49,7 @@ def week_result_rows(connection, date, name):
     result = cursor.fetchall()
     return result
 
+
 def add_report(connection, current_date, name, site, value):
     """
     Запись в бд отчета за текущую дату для одного сайта
@@ -63,6 +66,18 @@ def add_report(connection, current_date, name, site, value):
         line = f"""INSERT INTO main (date, name, {site}) VALUES (?, ?, ?)"""
         cursor.execute(line, (current_date, name, value))
         connection.commit()
+
+
+def rows_for_week(connection, name):
+    """
+    Получаем все записи от понедельника текущей недели для модели
+    """
+    # Дата понедельника текущей недели
+    date = date.today() - datetime.timedelta(days=date.today().isoweekday() % 7 - 1)
+    cursor = connection.cursor()
+    result = cursor.execute("""SELECT * FROM main WHERE date >= ? AND name = ?;""", (date, name,))
+    result = cursor.fetchall()
+    return result
 
 # if __name__ == "__main__":
 #     current_date = date.today()
