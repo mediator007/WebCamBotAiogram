@@ -33,14 +33,18 @@ def sum_for_week(rows):
     """
     week_sum = []
     for row in rows:
+        row = list(row)
+        for i in range(len(row)):
+            if row[i] is None:
+                row[i] = 0
         sum_for_day = (0.05 * (
-            result[i]['Chaturbate (tks)'] +
-            result[i]['CamSoda'] +
-            result[i]['MFC (tks)'] +
-            result[i]['Stripchat (tks)']
+            row[2] +
+            row[3] +
+            row[4] +
+            row[5]
             ) +
-            result[i]['Jasmin'] + 
-            result[i]['Streamate']
+            row[6] + 
+            row[7]
             ) * 0.5  # Добавить остальные поля!!!
         week_sum.append(sum_for_day)
     return sum(week_sum)

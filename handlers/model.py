@@ -71,7 +71,7 @@ async def model_deals(message):
         if message.text.lower() == available_work_buttons[1]:
 
             with sqlite3.connect("database.db") as conn:
-                rows = rows_for_week(name)
+                rows = rows_for_week(conn, name)
             
             result = sum_for_week(rows)
 
@@ -138,7 +138,7 @@ async def report_sum(message, state):
         with sqlite3.connect("database.db") as conn:
             name = name_by_chat_id(conn, chat_id)
             name = name[0]
-            await add_report(conn, current_date, name, site, report_sum)
+            add_report(conn, current_date, name, site, report_sum)
 
         await message.answer(f"В {site} записано {report_sum}")
         await OrderDeals.waiting_for_modeldeals.set() 

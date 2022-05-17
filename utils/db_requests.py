@@ -73,9 +73,9 @@ def rows_for_week(connection, name):
     Получаем все записи от понедельника текущей недели для модели
     """
     # Дата понедельника текущей недели
-    date = date.today() - datetime.timedelta(days=date.today().isoweekday() % 7 - 1)
+    monday_date = date.today() - datetime.timedelta(days=date.today().isoweekday() % 7 - 1)
     cursor = connection.cursor()
-    result = cursor.execute("""SELECT * FROM main WHERE date >= ? AND name = ?;""", (date, name,))
+    result = cursor.execute("""SELECT * FROM main WHERE date >= ? AND name = ?;""", (monday_date, name,))
     result = cursor.fetchall()
     return result
 
