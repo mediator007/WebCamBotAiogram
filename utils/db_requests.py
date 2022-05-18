@@ -57,7 +57,7 @@ def add_report(connection, current_date, name, site, value):
     cursor = connection.cursor()
     check = cursor.execute("""SELECT * FROM main WHERE date = ? AND name = ?""", (current_date, name))
     check = cursor.fetchall()
-    # If was any reports in CURRENT dat
+    # If was any reports in CURRENT date
     if check:
         line = f"""UPDATE main SET {site} = {value} WHERE date = ? AND name = ?"""
         cursor.execute(line, (current_date, name,))
@@ -98,8 +98,20 @@ def delete_admin_from_db(chat_id):
 
 
 def get_admin_list():
+    """
+    Список админов для рассылки отчета прие его отправлении моделью
+    """
     sql_request = """SELECT chat_id FROM admin_registration;"""
     result = return_function(sql_request)
+    return result
+
+
+def search_admin_for_reboot(chat_id):
+    """
+    Поиск админа в БД для восстановлении сессии при ребуте
+    """
+    sql_request = """SELECT * FROM admin_registration WHERE chat_id = ?;"""
+    result = return_function(sql_request, chat_id)
     return result
 
 
