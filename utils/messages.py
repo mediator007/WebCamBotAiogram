@@ -34,3 +34,16 @@ DeleteModel = (
     f"из файла с ID доступа к боту, или же её ID изменен. \n"
     f"В противном случае модель сможет восстановить сессию по старому ID.\n"
 )
+
+def create_message_answer(report: tuple):
+    message_answer = f"""
+        date: {report[0]}
+        name: {report[1]} 
+        chaturbate: {report[2]} 
+        camsoda: {report[3]}
+        mfc: {report[4]}
+        stripchat: {report[5]}
+        jasmin: {report[6]}
+        streamate: {report[7]}
+        """
+    return message_answer

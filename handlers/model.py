@@ -22,8 +22,6 @@ from utils.local_vars import (
 from utils.functions import OrderDeals, sum_for_week, bonus
 from utils.settings import dp, bot
 
-logger.add("bot_debug.log", format="{time} {level} {message}", level="INFO", rotation="1 MB")
-
 current_date = date.today()
 
 sites_cb = CallbackData('vote', 'action')  # vote:<action>

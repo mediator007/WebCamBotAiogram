@@ -60,10 +60,10 @@ def create_admin_registration():
     conn.close()
 
 
-# if __name__ == "__main__":
+if __name__ == "__main__":
     # delete_from_logins()
-    # create_main()
-    # create_registration()
-    # create_admin_registration()
+    create_main()
+    create_registration()
+    create_admin_registration()
     # select_all_logins()
     # drop_table()

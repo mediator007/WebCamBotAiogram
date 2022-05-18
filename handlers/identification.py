@@ -8,8 +8,6 @@ from utils.local_vars import available_admin_buttons, available_work_buttons, ad
 from utils.db_requests import update_chat_id_in_registration, add_admin_to_db
 from utils import messages as texts
 
-logger.add("bot_debug.log", format="{time} {level} {message}", level="INFO", rotation="1 MB")
-
 
 async def identification(message):
     """
@@ -32,13 +30,12 @@ async def identification(message):
 
         # Если нет айдишника в списке моделей, проверка на айдишник админа
         if not validation_result:
-            admin_search_res = lambda admin_pass, input_id: admin_pass == input_id
 
             # Если айдишник админа - добавляем кнопки, улетаем в функцию админа
-            if admin_search_res:
+            if input_id == admin_pass:
                 chat_id = message.from_user.id
                 add_admin_to_db(chat_id)
-                markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+                markup = types.ReplyKeyboardMarkup(row_width=2)
                 for name in available_admin_buttons:
                     markup.add(name)
                 logger.info(f"Начата сессия администратора")

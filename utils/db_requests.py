@@ -115,6 +115,24 @@ def search_admin_for_reboot(chat_id):
     return result
 
 
+def cur_date_report_for_admin():
+    """
+    Report for admin by current date
+    """
+    current_date = datetime.date.today()
+    sql_request = """SELECT * FROM main WHERE date = ?;"""
+    result = return_function(sql_request, current_date)
+    return result
+
+def date_report_for_admin(selected_date):
+    """
+    Report for admin by selected date
+    """
+    sql_request = """SELECT * FROM main WHERE date = ?;"""
+    result = return_function(sql_request, selected_date)
+    return result
+
+
 def execute_function(sql_request, *args):
     with sqlite3.connect("./database.db") as conn:
         cursor = conn.cursor()
