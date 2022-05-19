@@ -30,13 +30,15 @@ Help = (
 
 def create_message_answer(report: tuple):
     message_answer = f"""
-        date: {report[0]}
-        name: {report[1]} 
-        chaturbate: {report[2]} 
-        camsoda: {report[3]}
-        mfc: {report[4]}
-        stripchat: {report[5]}
-        jasmin: {report[6]}
-        streamate: {report[7]}
-        """
+    {report[0]} {report[1]}
+    Отчет по сайтам 
+
+    chaturbate: {report[2]} 
+    camsoda: {report[3]}
+    mfc: {report[4]}
+    stripchat: {report[5]}
+    jasmin: {report[6]}
+    streamate: {report[7]}
+    """
+        
     return message_answer

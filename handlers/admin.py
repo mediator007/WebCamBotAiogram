@@ -120,14 +120,30 @@ async def model_add(message: types.Message, state):
         rand_id = random.randint(111111, 999999)
 
     name = message.text
-    if bool(re.match(r"[A-Z]{1}[a-z]{1,15}$", name)) == True:
-        add_model(name, rand_id)
-        await message.answer(f"Модель {name} зарегестирована с id: {rand_id}")
+
+    # Проверка уникальности имени
+    models_names_list_tuple = model_name_list()
+    models_names_list = []
+    for t in models_names_list_tuple:
+        models_names_list.append(t[0])
+    
+    if name in models_names_list:
+        logger.warning(f"Администратор {message.from_user.id} пытался создать {name} повторно")
+        await message.answer(f"Имя уже {name} существует в списке зарегестрированных моделей")
         await OrderDeals.waiting_for_admindeals.set()
+    
+    # Если имя уникально проверяем корректность его ввода регуляркой
     else:
-        await message.answer(f"Введите корректное имя (латиницей, с заглавной буквы, не более 15 символов)")
-        await message.answer(f"Например: Maria")
-        await OrderDeals.waiting_for_model_add.set()
+        if bool(re.match(r"[A-Z]{1}[a-z]{1,15}$", name)) == True:
+            add_model(name, rand_id)
+            logger.info(f"Администратор {message.from_user.id} добавил модель {name}")
+            await message.answer(f"Модель {name} зарегестирована с id: {rand_id}")
+            await OrderDeals.waiting_for_admindeals.set()
+        else:
+            logger.warning(f"Администратор {message.from_user.id} некорректно ввел имя {name}")
+            await message.answer(f"Введите корректное имя (латиницей, с заглавной буквы, не более 15 символов)")
+            await message.answer(f"Например: Maria")
+            await OrderDeals.waiting_for_model_add.set()
     
 
 async def model_delete(message: types.Message, state):
@@ -141,6 +157,7 @@ async def model_delete(message: types.Message, state):
 
     if message.text in models_names_list:
         delete_model(message.text)
+        logger.info(f"Администратор {message.from_user.id} удалил модель {message.text}")
         await message.answer(f"Модель {message.text} удалена")
         await OrderDeals.waiting_for_admindeals.set()
     else:
