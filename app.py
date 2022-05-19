@@ -17,24 +17,36 @@ from utils.functions import OrderDeals
 from handlers.model import model_deals
 from handlers.identification import identification
 from handlers.bot_start import bot_start
-from handlers.admin import admin_deals
+from handlers.admin import admin_deals, model_add
 
 from utils.settings import dp, bot
 
 
 async def bot_help(message: types.Message, state: FSMContext):
+    """
+    Вызов справки по боту
+    """
     await message.answer(texts.Help)
 
 
 async def bonus_syst(message: types.Message, state: FSMContext):
+    """
+    Таблица бонусной системы
+    """
     await message.answer(texts.Bonus_table)
 
 
 async def mailing(message: types.Message, state: FSMContext):
+    """
+    Управление рассылкой
+    """
     await message.answer("Раздел находится в разработке")
 
 
 def register_handlers_deals(dp: Dispatcher):
+    """
+    Регистрация хэндлеров
+    """
     dp.register_message_handler(callback=bot_start, commands="start", state="*")
     dp.register_message_handler(callback=bot_help, commands="help", state="*")
     dp.register_message_handler(callback=bonus_syst, commands="bonussyst", state="*")
@@ -42,7 +54,7 @@ def register_handlers_deals(dp: Dispatcher):
     dp.register_message_handler(callback=identification, state=OrderDeals.waiting_for_ID)
     dp.register_message_handler(callback=model_deals, state=OrderDeals.waiting_for_modeldeals)
     dp.register_message_handler(callback=admin_deals, state=OrderDeals.waiting_for_admindeals)
-    # dp.register_message_handler(callback=model_delete, state=OrderDeals.waiting_for_modeldelete)
+    dp.register_message_handler(callback=model_add, state=OrderDeals.waiting_for_model_add)
 
 
 # Регистрация команд, отображаемых в интерфейсе Telegram

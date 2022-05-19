@@ -102,8 +102,7 @@ def get_admin_list():
     Список админов для рассылки отчета прие его отправлении моделью
     """
     sql_request = """SELECT chat_id FROM admin_registration;"""
-    result = return_function(sql_request)
-    return result
+    return return_function(sql_request)
 
 
 def search_admin_for_reboot(chat_id):
@@ -111,8 +110,7 @@ def search_admin_for_reboot(chat_id):
     Поиск админа в БД для восстановлении сессии при ребуте
     """
     sql_request = """SELECT * FROM admin_registration WHERE chat_id = ?;"""
-    result = return_function(sql_request, chat_id)
-    return result
+    return return_function(sql_request, chat_id)
 
 
 def cur_date_report_for_admin():
@@ -121,17 +119,40 @@ def cur_date_report_for_admin():
     """
     current_date = datetime.date.today()
     sql_request = """SELECT * FROM main WHERE date = ?;"""
-    result = return_function(sql_request, current_date)
-    return result
+    return return_function(sql_request, current_date)
+
 
 def date_report_for_admin(selected_date):
     """
     Report for admin by selected date
     """
     sql_request = """SELECT * FROM main WHERE date = ?;"""
-    result = return_function(sql_request, selected_date)
-    return result
+    return return_function(sql_request, selected_date)
 
+
+def get_model_list() -> list:
+    """
+    Return list of registered models
+    """
+    sql_request = """SELECT name, id FROM registration;"""
+    return return_function(sql_request)
+
+
+def add_model(name, rand_id):
+    """
+    Add model to registration
+    """
+    sql_request = """INSERT INTO registration (name, id) VALUES (?, ?);"""
+    execute_function(sql_request, name, rand_id)
+
+
+def check_id() -> list:
+    """
+    Возвращает все айди моделей для проверки уникальности созданного
+    """
+    sql_request = """SELECT id FROM registration;"""
+    return return_function(sql_request)
+    
 
 def execute_function(sql_request, *args):
     with sqlite3.connect("./database.db") as conn:
