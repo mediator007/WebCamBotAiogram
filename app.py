@@ -17,7 +17,7 @@ from utils.functions import OrderDeals
 from handlers.model import model_deals
 from handlers.identification import identification
 from handlers.bot_start import bot_start
-from handlers.admin import admin_deals, model_add
+from handlers.admin import admin_deals, model_add, model_delete
 
 from utils.settings import dp, bot
 
@@ -55,6 +55,7 @@ def register_handlers_deals(dp: Dispatcher):
     dp.register_message_handler(callback=model_deals, state=OrderDeals.waiting_for_modeldeals)
     dp.register_message_handler(callback=admin_deals, state=OrderDeals.waiting_for_admindeals)
     dp.register_message_handler(callback=model_add, state=OrderDeals.waiting_for_model_add)
+    dp.register_message_handler(callback=model_delete, state=OrderDeals.waiting_for_model_delete)
 
 
 # Регистрация команд, отображаемых в интерфейсе Telegram

@@ -152,6 +152,22 @@ def check_id() -> list:
     """
     sql_request = """SELECT id FROM registration;"""
     return return_function(sql_request)
+
+
+def model_name_list() -> list:
+    """
+    Возвращает все айди моделей для проверки уникальности созданного
+    """
+    sql_request = """SELECT name FROM registration;"""
+    return return_function(sql_request)
+
+def delete_model(name):
+    """
+    Delete model from registration
+    """
+    sql_request = """DELETE FROM registration WHERE name = ?;"""
+    execute_function(sql_request, name)
+
     
 
 def execute_function(sql_request, *args):

@@ -18,6 +18,8 @@ from utils.db_requests import (
     get_model_list,
     check_id,
     add_model,
+    model_name_list,
+    delete_model,
     )
 from utils.local_vars import (
     available_admin_buttons, 
@@ -64,9 +66,15 @@ async def admin_deals(message: types.Message, state):
 
     # Добавить модель
     elif message.text.lower() == available_admin_buttons[3]:
-        
+        await message.answer(f"Добавление модели")
         await message.answer(f"Введите имя с заглавной буквы")
         await OrderDeals.waiting_for_model_add.set()
+    
+    # Удалить модель
+    elif message.text.lower() == available_admin_buttons[4]:
+        await message.answer(f"Удаление модели")
+        await message.answer(f"Введите имя с заглавной буквы")
+        await OrderDeals.waiting_for_model_delete.set()
 
     # Выход из учетной записи админа
     elif message.text.lower() == available_admin_buttons[-1]:
@@ -121,3 +129,20 @@ async def model_add(message: types.Message, state):
         await message.answer(f"Например: Maria")
         await OrderDeals.waiting_for_model_add.set()
     
+
+async def model_delete(message: types.Message, state):
+    """
+    Удаление модели
+    """
+    models_names_list_tuple = model_name_list()
+    models_names_list = []
+    for t in models_names_list_tuple:
+        models_names_list.append(t[0])
+
+    if message.text in models_names_list:
+        delete_model(message.text)
+        await message.answer(f"Модель {message.text} удалена")
+        await OrderDeals.waiting_for_admindeals.set()
+    else:
+        await message.answer(f"Модели с таким именем нет")
+        await OrderDeals.waiting_for_admindeals.set()
