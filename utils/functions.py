@@ -23,31 +23,44 @@ def sum_for_week(rows):
     """
     Считает сумму по строкам из бд
     """
-    week_sum = []
+    week_sum_list = []
     for row in rows:
         row = list(row)
         for i in range(len(row)):
             if row[i] is None:
                 row[i] = 0
-        sum_for_day = (0.05 * (
-            row[2] +
-            row[3] +
-            row[4] +
-            row[5]
-            ) +
-            row[6] + 
-            row[7]
-            ) * 0.5  # Добавить остальные поля
-        week_sum.append(sum_for_day)
-    return sum(week_sum)
+        sum_for_day = (
+            0.05 * (row[2] + row[3] + row[4] + row[5]) + 
+            row[6] + row[7]
+            )
+        week_sum_list.append(sum_for_day)
+    week_sum = sum(week_sum_list)
+    return week_sum
 
 
-def bonus(balance):
+def bonus(week_sum):
     """
-    Расчет остатка до бонуса
+    Расчет бонуса
     """
-    for i in range(300, 800, 50):
-        if i > balance:
-            message = f"Остаток до бонуса {bonus_table[i]}% составляет {i - balance:.2f}$"
-            break
-    return message
+    if week_sum < 300:
+        return 50
+    
+    for i in range(350, 800, 50):
+        if i > week_sum:
+            return bonus_table[i-50]
+    
+    if week_sum >= 750:
+        return bonus_table[750]
+
+def for_next_bonus(week_sum):
+    """
+    Расчет бонуса
+    """
+    if week_sum < 300:
+        remains = 300 - week_sum
+        return remains
+    
+    for i in range(350, 800, 50):
+        if i > week_sum:
+            remains = i - week_sum
+            return remains

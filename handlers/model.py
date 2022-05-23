@@ -19,7 +19,12 @@ from utils.local_vars import (
     available_sites_buttons,
     )
 
-from utils.functions import OrderDeals, sum_for_week, bonus
+from utils.functions import (
+    OrderDeals, 
+    sum_for_week, 
+    bonus, 
+    for_next_bonus,
+    )
 from utils.settings import dp, bot
 
 current_date = date.today()
@@ -73,20 +78,31 @@ async def model_deals(message):
             with sqlite3.connect("database.db") as conn:
                 rows = rows_for_week(conn, name)
             
-            result = sum_for_week(rows)
+            week_result = sum_for_week(rows)
+            week_bonus = bonus(week_result)
+            model_get = week_result * (week_bonus / 100)
 
-            await message.answer(f"Ваш текущий баланс {result:.2f} $")
+            await message.answer(
+                f"Ваш текущий баланс {model_get:.2f} $ \n"
+                f"Ваш бонус {week_bonus} %"
+                )
             return
 
         # Если нажато Остаток до бонуса
         elif message.text.lower() == available_work_buttons[2]:
+            logger.info(f"{name} запрос остатка до бонуса")
             with sqlite3.connect("database.db") as conn:
                 rows = rows_for_week(conn, name)
-            result = sum_for_week(rows)
-            bonus_message = bonus(result)
-            logger.info(f"{name} запрос остатка до бонуса")
-            await message.answer(f"{bonus_message}")
-            return
+
+            week_result = sum_for_week(rows)
+            if week_result >= 750:
+                await message.answer(f"У вас максимальный бонус 60 %")
+                return
+            else:
+                week_bonus = bonus(week_result)
+                remains = for_next_bonus(week_result)
+                await message.answer(f"До следующего бонуса в {week_bonus + 1}% осталось {remains}$")
+                return
 
         # Если нажато Выйти из аккаунта
         elif message.text.lower() == available_work_buttons[3]:
