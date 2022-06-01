@@ -175,7 +175,8 @@ def check_model_auth(input_id):
     Check is model auth already, to prevent double registration
     """
     sql_request = """SELECT chat_id FROM registration WHERE id = ?;"""
-    return_function(sql_request, input_id)
+    print("inid", input_id)
+    return return_function(sql_request, input_id)
 
 
 def execute_function(sql_request, *args):
@@ -190,4 +191,5 @@ def return_function(sql_request, *args):
         cursor = conn.cursor()
         cursor.execute(sql_request, args)
         result = cursor.fetchall()
+        print("!!!", result)
         return result

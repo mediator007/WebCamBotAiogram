@@ -57,25 +57,27 @@ async def identification(message):
 
             # Проверка на повторную аутентификацию by model
             check_double_reg = check_model_auth(input_id)
-            if check_double_reg is not None:
+            print(check_double_reg[0][0])
+            if check_double_reg[0][0] is not None:
                 await message.answer("Данная модель уже зарегестрирована")
                 await OrderDeals.waiting_for_ID.set()
-                
-            # Получаем имя модели по введенному id
-            name = validation_result[0]
-            # id диалога
-            chat_id = message.from_user.id
+            
+            else:
+                # Получаем имя модели по введенному id
+                name = validation_result[0]
+                # id диалога
+                chat_id = message.from_user.id
 
-            # Обновляем поле chat_id в бд для авторизации при ребуте
-            with sqlite3.connect("database.db") as conn:
-                update_chat_id_in_registration(conn, chat_id, input_id)
+                # Обновляем поле chat_id в бд для авторизации при ребуте
+                with sqlite3.connect("database.db") as conn:
+                    update_chat_id_in_registration(conn, chat_id, input_id)
 
-            # Добавляем клавиатуру с кнопками из списка
-            markup = create_keyboard(available_work_buttons)
+                # Добавляем клавиатуру с кнопками из списка
+                markup = create_keyboard(available_work_buttons)
 
-            logger.info(f"{name} log in")
-            await message.answer(f"Привет {name}, ты зарегистрирована.", reply_markup=markup)
-            await OrderDeals.waiting_for_modeldeals.set()
+                logger.info(f"{name} log in")
+                await message.answer(f"Привет {name}, ты зарегистрирована.", reply_markup=markup)
+                await OrderDeals.waiting_for_modeldeals.set()
 
     except Exception as exc:
         logger.error(f"Ошибка ввода id - {exc}")
