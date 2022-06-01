@@ -5,7 +5,11 @@ from loguru import logger
 from utils.functions import OrderDeals
 from utils.db_requests import name_by_input_id
 from utils.local_vars import available_admin_buttons, available_work_buttons, admin_pass
-from utils.db_requests import update_chat_id_in_registration, add_admin_to_db
+from utils.db_requests import (
+    update_chat_id_in_registration, 
+    add_admin_to_db,
+    check_model_auth,
+    )
 from utils import messages as texts
 
 
@@ -50,6 +54,13 @@ async def identification(message):
 
         # Введенный id найден в registration
         else:
+
+            # Проверка на повторную аутентификацию
+            check_double_reg = check_model_auth(input_id)
+            if check_double_reg is not None:
+                await message.answer("Данная модель уже зарегестрирована")
+                await OrderDeals.waiting_for_ID.set()
+                
             # Получаем имя модели по введенному id
             name = validation_result[0]
             # id диалога
