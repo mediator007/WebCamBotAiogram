@@ -1,3 +1,4 @@
+# V2
 import sqlite3
 from loguru import  logger
 from aiogram import types
