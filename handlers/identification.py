@@ -2,7 +2,7 @@ import sqlite3
 from aiogram import Dispatcher, types
 from loguru import logger
 
-from utils.functions import OrderDeals
+from utils.functions import OrderDeals, create_keyboard
 from utils.db_requests import name_by_input_id
 from utils.local_vars import available_admin_buttons, available_work_buttons, admin_pass
 from utils.db_requests import (
@@ -39,9 +39,9 @@ async def identification(message):
             if input_id == admin_pass:
                 chat_id = message.from_user.id
                 add_admin_to_db(chat_id)
-                markup = types.ReplyKeyboardMarkup(row_width=2)
-                for name in available_admin_buttons:
-                    markup.add(name)
+
+                markup = create_keyboard(available_admin_buttons)
+
                 logger.info(f"Начата сессия администратора")
                 await message.answer("Сессия администратора", reply_markup=markup)
                 await OrderDeals.waiting_for_admindeals.set()
@@ -55,7 +55,7 @@ async def identification(message):
         # Введенный id найден в registration
         else:
 
-            # Проверка на повторную аутентификацию
+            # Проверка на повторную аутентификацию by model
             check_double_reg = check_model_auth(input_id)
             if check_double_reg is not None:
                 await message.answer("Данная модель уже зарегестрирована")
@@ -71,9 +71,7 @@ async def identification(message):
                 update_chat_id_in_registration(conn, chat_id, input_id)
 
             # Добавляем клавиатуру с кнопками из списка
-            markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-            for button in available_work_buttons:
-                markup.add(button)
+            markup = create_keyboard(available_work_buttons)
 
             logger.info(f"{name} log in")
             await message.answer(f"Привет {name}, ты зарегистрирована.", reply_markup=markup)

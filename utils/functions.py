@@ -1,8 +1,18 @@
 import datetime
 import time
-from utils.local_vars import admin_pass, cells_for_sum, bonus_table
+
 from loguru import logger
 from aiogram.dispatcher.filters.state import State, StatesGroup
+from aiogram import types
+from aiogram.utils.callback_data import CallbackData
+
+from utils.local_vars import (
+    admin_pass, 
+    cells_for_sum, 
+    bonus_table, 
+    available_work_buttons,
+    available_sites_buttons,
+    )
 
 
 class OrderDeals(StatesGroup):
@@ -68,3 +78,35 @@ def for_next_bonus(week_sum):
     
     if week_sum >= 750:
         return 0
+
+
+def create_keyboard(buttons_list: list) -> types.ReplyKeyboardMarkup:
+    """
+    Create ReplyKeyboardMarkup markup
+    """
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    for button in buttons_list:
+        markup.add(button)
+    return markup
+
+
+sites_cb = CallbackData('vote', 'action')  # vote:<action>
+
+def get_keyboard():
+    """
+    Create InlineKeyboardMarkup
+    """
+    keyboard_markup = types.InlineKeyboardMarkup(row_width=1)
+    row_btns_1 = (
+        types.InlineKeyboardButton(available_sites_buttons[0], callback_data=sites_cb.new(action=available_sites_buttons[0])),
+        types.InlineKeyboardButton(available_sites_buttons[1], callback_data=sites_cb.new(action=available_sites_buttons[1])),
+        types.InlineKeyboardButton(available_sites_buttons[2], callback_data=sites_cb.new(action=available_sites_buttons[2])),
+        )
+    row_btns_2 = (
+        types.InlineKeyboardButton(available_sites_buttons[3], callback_data=sites_cb.new(action=available_sites_buttons[3])),
+        types.InlineKeyboardButton(available_sites_buttons[4], callback_data=sites_cb.new(action=available_sites_buttons[4])),
+        types.InlineKeyboardButton(available_sites_buttons[5], callback_data=sites_cb.new(action=available_sites_buttons[5])),
+        )
+    keyboard_markup.row(*row_btns_1)
+    keyboard_markup.row(*row_btns_2)
+    return keyboard_markup
