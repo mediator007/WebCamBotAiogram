@@ -52,9 +52,10 @@ def bonus(week_sum):
     if week_sum >= 750:
         return bonus_table[750]
 
+
 def for_next_bonus(week_sum):
     """
-    Расчет бонуса
+    Расчет остатка до следующего бонуса
     """
     if week_sum < 300:
         remains = 300 - week_sum
@@ -64,3 +65,6 @@ def for_next_bonus(week_sum):
         if i > week_sum:
             remains = i - week_sum
             return remains
+    
+    if week_sum >= 750:
+        return 0
