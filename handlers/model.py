@@ -138,7 +138,10 @@ async def report_by_site(callback_query, state):
     answer_data = callback_query.data[5:]
     logger.info(f"Для отчета выбран {answer_data}")
     await state.update_data(chosen_site=answer_data.lower())
-    await callback_query.answer(f'Введите сумму для {answer_data}')
+    
+    # await callback_query.answer(f'')
+    await bot.send_message(callback_query.from_user.id, f"Введите сумму для {answer_data}", reply_markup=types.ReplyKeyboardRemove())
+
     await OrderDeals.waiting_for_report_sum.set()
 
 
@@ -147,6 +150,12 @@ async def report_sum(message, state):
     """
     Функция принимает сумму для записи в бд
     """
+
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    for button in available_work_buttons:
+        markup.add(button)
+
+
     report_sum = message.text
     chat_id = message.from_user.id
     try:
@@ -166,7 +175,7 @@ async def report_sum(message, state):
             await bot.send_message(admin[0], f"{name} - {site} - {report_sum}")
 
         logger.info(f"{name} занесение в БД {report_sum} в {site} ")
-        await message.answer(f"В {site} записано {report_sum}")
+        await message.answer(f"В {site} записано {report_sum}", reply_markup=markup)
         await OrderDeals.waiting_for_modeldeals.set()
     
     except Exception as e:
