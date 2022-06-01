@@ -1,3 +1,4 @@
+# V2
 import sqlite3
 from loguru import  logger
 from aiogram import types
@@ -15,8 +16,8 @@ from utils.db_requests import (
     )
 
 from utils.local_vars import (
-    available_work_buttons, 
     available_sites_buttons,
+    available_work_buttons,
     )
 
 from utils.functions import (
@@ -24,28 +25,13 @@ from utils.functions import (
     sum_for_week, 
     bonus, 
     for_next_bonus,
+    create_keyboard,
+    sites_cb,
+    get_keyboard,
     )
 from utils.settings import dp, bot
 
 current_date = date.today()
-
-sites_cb = CallbackData('vote', 'action')  # vote:<action>
-
-def get_keyboard():
-    keyboard_markup = types.InlineKeyboardMarkup(row_width=1)
-    row_btns_1 = (
-        types.InlineKeyboardButton(available_sites_buttons[0], callback_data=sites_cb.new(action=available_sites_buttons[0])),
-        types.InlineKeyboardButton(available_sites_buttons[1], callback_data=sites_cb.new(action=available_sites_buttons[1])),
-        types.InlineKeyboardButton(available_sites_buttons[2], callback_data=sites_cb.new(action=available_sites_buttons[2])),
-        )
-    row_btns_2 = (
-        types.InlineKeyboardButton(available_sites_buttons[3], callback_data=sites_cb.new(action=available_sites_buttons[3])),
-        types.InlineKeyboardButton(available_sites_buttons[4], callback_data=sites_cb.new(action=available_sites_buttons[4])),
-        types.InlineKeyboardButton(available_sites_buttons[5], callback_data=sites_cb.new(action=available_sites_buttons[5])),
-        )
-    keyboard_markup.row(*row_btns_1)
-    keyboard_markup.row(*row_btns_2)
-    return keyboard_markup
 
 async def model_deals(message):
     """
@@ -137,7 +123,13 @@ async def report_by_site(callback_query, state):
     answer_data = callback_query.data[5:]
     logger.info(f"Для отчета выбран {answer_data}")
     await state.update_data(chosen_site=answer_data.lower())
-    await callback_query.answer(f'Введите сумму для {answer_data}')
+    
+    # await callback_query.answer(f'')
+    await bot.send_message(
+        callback_query.from_user.id, f"Введите сумму для {answer_data}", 
+        reply_markup= types.ReplyKeyboardRemove()
+    )
+
     await OrderDeals.waiting_for_report_sum.set()
 
 
@@ -146,6 +138,10 @@ async def report_sum(message, state):
     """
     Функция принимает сумму для записи в бд
     """
+
+    markup = create_keyboard(available_work_buttons)
+
+
     report_sum = message.text
     chat_id = message.from_user.id
     try:
@@ -153,6 +149,7 @@ async def report_sum(message, state):
         site = await state.get_data()
         site = site['chosen_site']
 
+        # Запись суммы в БД
         with sqlite3.connect("database.db") as conn:
             name = name_by_chat_id(conn, chat_id)
             name = name[0]
@@ -165,10 +162,10 @@ async def report_sum(message, state):
             await bot.send_message(admin[0], f"{name} - {site} - {report_sum}")
 
         logger.info(f"{name} занесение в БД {report_sum} в {site} ")
-        await message.answer(f"В {site} записано {report_sum}")
+        await message.answer(f"В {site} записано {report_sum}", reply_markup=markup)
         await OrderDeals.waiting_for_modeldeals.set()
     
     except Exception as e:
         logger.error(f"Ошибка ввода суммы: {e}")
-        await message.answer("Сумма должна быть числом")
+        await message.answer("Сумма должна быть числом", reply_markup=markup)
         await OrderDeals.waiting_for_modeldeals.set()

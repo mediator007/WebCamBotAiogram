@@ -2,10 +2,14 @@ import sqlite3
 from aiogram import Dispatcher, types
 from loguru import logger
 
-from utils.functions import OrderDeals
+from utils.functions import OrderDeals, create_keyboard
 from utils.db_requests import name_by_input_id
 from utils.local_vars import available_admin_buttons, available_work_buttons, admin_pass
-from utils.db_requests import update_chat_id_in_registration, add_admin_to_db
+from utils.db_requests import (
+    update_chat_id_in_registration, 
+    add_admin_to_db,
+    check_model_auth,
+    )
 from utils import messages as texts
 
 
@@ -35,9 +39,9 @@ async def identification(message):
             if input_id == admin_pass:
                 chat_id = message.from_user.id
                 add_admin_to_db(chat_id)
-                markup = types.ReplyKeyboardMarkup(row_width=2)
-                for name in available_admin_buttons:
-                    markup.add(name)
+
+                markup = create_keyboard(available_admin_buttons)
+
                 logger.info(f"Начата сессия администратора")
                 await message.answer("Сессия администратора", reply_markup=markup)
                 await OrderDeals.waiting_for_admindeals.set()
@@ -50,23 +54,30 @@ async def identification(message):
 
         # Введенный id найден в registration
         else:
-            # Получаем имя модели по введенному id
-            name = validation_result[0]
-            # id диалога
-            chat_id = message.from_user.id
 
-            # Обновляем поле chat_id в бд для авторизации при ребуте
-            with sqlite3.connect("database.db") as conn:
-                update_chat_id_in_registration(conn, chat_id, input_id)
+            # Проверка на повторную аутентификацию by model
+            check_double_reg = check_model_auth(input_id)
+            print(check_double_reg[0][0])
+            if check_double_reg[0][0] is not None:
+                await message.answer("Данная модель уже зарегестрирована")
+                await OrderDeals.waiting_for_ID.set()
+            
+            else:
+                # Получаем имя модели по введенному id
+                name = validation_result[0]
+                # id диалога
+                chat_id = message.from_user.id
 
-            # Добавляем клавиатуру с кнопками из списка
-            markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-            for button in available_work_buttons:
-                markup.add(button)
+                # Обновляем поле chat_id в бд для авторизации при ребуте
+                with sqlite3.connect("database.db") as conn:
+                    update_chat_id_in_registration(conn, chat_id, input_id)
 
-            logger.info(f"{name} log in")
-            await message.answer(f"Привет {name}, ты зарегистрирована.", reply_markup=markup)
-            await OrderDeals.waiting_for_modeldeals.set()
+                # Добавляем клавиатуру с кнопками из списка
+                markup = create_keyboard(available_work_buttons)
+
+                logger.info(f"{name} log in")
+                await message.answer(f"Привет {name}, ты зарегистрирована.", reply_markup=markup)
+                await OrderDeals.waiting_for_modeldeals.set()
 
     except Exception as exc:
         logger.error(f"Ошибка ввода id - {exc}")

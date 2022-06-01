@@ -161,6 +161,7 @@ def model_name_list() -> list:
     sql_request = """SELECT name FROM registration;"""
     return return_function(sql_request)
 
+
 def delete_model(name):
     """
     Delete model from registration
@@ -168,7 +169,15 @@ def delete_model(name):
     sql_request = """DELETE FROM registration WHERE name = ?;"""
     execute_function(sql_request, name)
 
-    
+
+def check_model_auth(input_id):
+    """
+    Check is model auth already, to prevent double registration
+    """
+    sql_request = """SELECT chat_id FROM registration WHERE id = ?;"""
+    print("inid", input_id)
+    return return_function(sql_request, input_id)
+
 
 def execute_function(sql_request, *args):
     with sqlite3.connect("./database.db") as conn:
@@ -182,4 +191,5 @@ def return_function(sql_request, *args):
         cursor = conn.cursor()
         cursor.execute(sql_request, args)
         result = cursor.fetchall()
+        print("!!!", result)
         return result
