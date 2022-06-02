@@ -40,7 +40,7 @@ def sum_for_week(rows):
             if row[i] is None:
                 row[i] = 0
         sum_for_day = (
-            0.05 * (row[2] + row[3] + row[4] + row[5]) + 
+            0.05 * (row[2] + row[3] + row[4] + row[5] + row[8]) + 
             row[6] + row[7]
             )
         week_sum_list.append(sum_for_day)
@@ -52,31 +52,31 @@ def bonus(week_sum):
     """
     Расчет бонуса
     """
-    if week_sum < 300:
+    if week_sum < 400:
         return 50
     
-    for i in range(350, 800, 50):
+    for i in range(450, 900, 50):
         if i > week_sum:
             return bonus_table[i-50]
     
-    if week_sum >= 750:
-        return bonus_table[750]
+    if week_sum >= 850:
+        return bonus_table[850]
 
 
 def for_next_bonus(week_sum):
     """
     Расчет остатка до следующего бонуса
     """
-    if week_sum < 300:
-        remains = 300 - week_sum
+    if week_sum < 400:
+        remains = 400 - week_sum
         return remains
     
-    for i in range(350, 800, 50):
+    for i in range(450, 900, 50):
         if i > week_sum:
             remains = i - week_sum
             return remains
     
-    if week_sum >= 750:
+    if week_sum >= 850:
         return 0
 
 
@@ -101,12 +101,16 @@ def get_keyboard():
         types.InlineKeyboardButton(available_sites_buttons[0], callback_data=sites_cb.new(action=available_sites_buttons[0])),
         types.InlineKeyboardButton(available_sites_buttons[1], callback_data=sites_cb.new(action=available_sites_buttons[1])),
         types.InlineKeyboardButton(available_sites_buttons[2], callback_data=sites_cb.new(action=available_sites_buttons[2])),
-        )
+    )
     row_btns_2 = (
         types.InlineKeyboardButton(available_sites_buttons[3], callback_data=sites_cb.new(action=available_sites_buttons[3])),
         types.InlineKeyboardButton(available_sites_buttons[4], callback_data=sites_cb.new(action=available_sites_buttons[4])),
         types.InlineKeyboardButton(available_sites_buttons[5], callback_data=sites_cb.new(action=available_sites_buttons[5])),
-        )
+    )
+    row_btns_3 = (
+        types.InlineKeyboardButton(available_sites_buttons[6], callback_data=sites_cb.new(action=available_sites_buttons[6])),
+    )
     keyboard_markup.row(*row_btns_1)
     keyboard_markup.row(*row_btns_2)
+    keyboard_markup.row(*row_btns_3)
     return keyboard_markup

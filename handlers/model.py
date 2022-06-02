@@ -87,7 +87,7 @@ async def model_deals(message):
             else:
                 week_bonus = bonus(week_result)
                 remains = for_next_bonus(week_result)
-                await message.answer(f"До следующего бонуса в {week_bonus + 1}% осталось {remains}$")
+                await message.answer(f"До следующего бонуса в {week_bonus + 1}% осталось {remains:.2f}$")
                 return
 
         # Если нажато Выйти из аккаунта
@@ -114,7 +114,8 @@ async def model_deals(message):
     available_sites_buttons[2],
     available_sites_buttons[3],
     available_sites_buttons[4],
-    available_sites_buttons[5]
+    available_sites_buttons[5],
+    available_sites_buttons[6]
     ]), state=OrderDeals.waiting_for_report)
 async def report_by_site(callback_query, state):
     """
@@ -124,11 +125,26 @@ async def report_by_site(callback_query, state):
     logger.info(f"Для отчета выбран {answer_data}")
     await state.update_data(chosen_site=answer_data.lower())
     
-    # await callback_query.answer(f'')
-    await bot.send_message(
-        callback_query.from_user.id, f"Введите сумму для {answer_data}", 
-        reply_markup= types.ReplyKeyboardRemove()
-    )
+    if answer_data in (
+        available_sites_buttons[0], 
+        available_sites_buttons[1],
+        available_sites_buttons[4],
+        available_sites_buttons[5],
+        available_sites_buttons[6],
+    ):
+        await bot.send_message(
+            callback_query.from_user.id, f"Введите сумму в токенах для {answer_data}", 
+            reply_markup= types.ReplyKeyboardRemove()
+        )
+
+    elif answer_data in (
+        available_sites_buttons[2], 
+        available_sites_buttons[3],
+    ):
+        await bot.send_message(
+            callback_query.from_user.id, f"Введите сумму в долларах для {answer_data}", 
+            reply_markup= types.ReplyKeyboardRemove()
+        )
 
     await OrderDeals.waiting_for_report_sum.set()
 

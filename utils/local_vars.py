@@ -1,3 +1,5 @@
+from typing import NamedTuple
+
 # порог $ для начала рассылки
 c = 500
 
@@ -10,8 +12,8 @@ cells_for_sum = [
 ]
 
 bonus_table = {
-    300: 51, 350: 52, 400: 53, 450: 54, 500: 55,
-    550: 56, 600: 57, 650: 58, 700: 59, 750: 60
+    400: 51, 450: 52, 500: 53, 550: 54, 600: 55,
+    650: 56, 700: 57, 750: 58, 800: 59, 850: 60
 }
 
 available_work_buttons = [
@@ -28,6 +30,7 @@ available_sites_buttons = [
     'Streamate', 
     'CamSoda', 
     'MFC',
+    'SkyPrivate',
     ]
 
 available_admin_buttons = [

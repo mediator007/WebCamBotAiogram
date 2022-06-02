@@ -38,7 +38,8 @@ def create_main():
         mfc INTEGER,
         stripchat INTEGER,
         jasmin FLOAT,
-        streamate FLOAT);""")
+        streamate FLOAT,
+        skyprivate INTEGER);""")
     conn.close()
 
 

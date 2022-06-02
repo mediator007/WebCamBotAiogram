@@ -6,7 +6,7 @@ from connections import sqlite_connector
 from export import GDriveExport
 from transform import main_transform, registration_transform
 from load import SqliteLoader
-from db_manage import create_main, create_registration
+from db_manage import create_main, create_registration, create_admin_registration
 
 
 def etl(connector) -> None:
@@ -37,10 +37,12 @@ if __name__ == '__main__':
     # Create tables
     create_main()
     create_registration()
+    create_admin_registration()
+    logger.info('Success tables creation')
 
     # main etl process
-    try:
-        with sqlite_connector("../database.db") as sqlite_conn:
-            etl(sqlite_conn)
-    except Exception as exc:
-        logger.error(f"{exc}")
+    # try:
+    #     with sqlite_connector("../database.db") as sqlite_conn:
+    #         etl(sqlite_conn)
+    # except Exception as exc:
+    #     logger.error(f"{exc}")

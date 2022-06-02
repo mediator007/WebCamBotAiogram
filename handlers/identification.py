@@ -57,7 +57,6 @@ async def identification(message):
 
             # Проверка на повторную аутентификацию by model
             check_double_reg = check_model_auth(input_id)
-            print(check_double_reg[0][0])
             if check_double_reg[0][0] is not None:
                 await message.answer("Данная модель уже зарегестрирована")
                 await OrderDeals.waiting_for_ID.set()
