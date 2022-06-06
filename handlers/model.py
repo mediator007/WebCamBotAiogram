@@ -1,5 +1,6 @@
 # V2
 import sqlite3
+from unicodedata import digit
 from loguru import  logger
 from aiogram import types
 from aiogram.utils.callback_data import CallbackData
@@ -157,8 +158,12 @@ async def report_sum(message, state):
 
     markup = create_keyboard(available_work_buttons)
 
-
     report_sum = message.text
+    if report_sum is not digit:
+        await message.answer("Сумма должна быть числом", reply_markup=markup)
+        await OrderDeals.waiting_for_modeldeals.set()
+        return
+
     chat_id = message.from_user.id
     try:
         report_sum = int(message.text)
@@ -183,5 +188,5 @@ async def report_sum(message, state):
     
     except Exception as e:
         logger.error(f"Ошибка ввода суммы: {e}")
-        await message.answer("Сумма должна быть числом", reply_markup=markup)
+        await message.answer("Сумма должна быть целым числом", reply_markup=markup)
         await OrderDeals.waiting_for_modeldeals.set()
