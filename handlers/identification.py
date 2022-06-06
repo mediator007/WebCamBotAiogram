@@ -23,8 +23,10 @@ async def identification(message):
         input_id = message.text
 
         if not input_id.isdigit():
+            logger.warning(f"id input not is digit: {input_id}")
             await message.answer("Id должен быть числом")
             await OrderDeals.waiting_for_ID.set()
+            return
 
         input_id = int(input_id)
 

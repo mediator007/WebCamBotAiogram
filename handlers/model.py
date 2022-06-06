@@ -159,7 +159,8 @@ async def report_sum(message, state):
     markup = create_keyboard(available_work_buttons)
 
     report_sum = message.text
-    if report_sum is not digit:
+    if not report_sum.isdigit():
+        logger.warning(f"Report input not is digit: {report_sum}")
         await message.answer("Сумма должна быть числом", reply_markup=markup)
         await OrderDeals.waiting_for_modeldeals.set()
         return
