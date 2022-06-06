@@ -24,7 +24,7 @@ from utils.db_requests import (
 from utils.local_vars import (
     available_admin_buttons, 
     )
-from utils.functions import OrderDeals
+from utils.functions import OrderDeals, transform_report
 from utils.settings import dp, bot
 from utils.messages import create_message_answer
 
@@ -43,6 +43,7 @@ async def admin_deals(message: types.Message, state):
         cur_date_report = cur_date_report_for_admin()
         if cur_date_report:
             for report in cur_date_report:
+                report = transform_report(report)
                 message_answer = create_message_answer(report)
                 await message.answer(f"{message_answer}")
         else:
@@ -98,6 +99,7 @@ async def process_simple_calendar(callback_query, callback_data: dict):
         # If for selected date reports exist:
         if date_report:
             for report in date_report:
+                report = transform_report(report)
                 message_answer = create_message_answer(report)
                 await callback_query.message.answer(f"{message_answer}")
                 await OrderDeals.waiting_for_admindeals.set()

@@ -114,3 +114,14 @@ def get_keyboard():
     keyboard_markup.row(*row_btns_2)
     keyboard_markup.row(*row_btns_3)
     return keyboard_markup
+
+
+def transform_report(report: tuple) -> tuple:
+    """
+    Change None for 0 in report
+    """
+    report = list(report)
+    for i in range(len(report)):
+        if report[i] is None:
+            report[i] = 0
+    return tuple(report)

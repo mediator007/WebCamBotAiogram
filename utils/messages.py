@@ -20,6 +20,10 @@ Bonus_table = (
 
 Help = (
     f"Это бот вебкам студии. \n"
+    f"Инструкцию по работе с ботом вы найдете здесь: \n"
+    " \n"
+    f"https://telegra.ph/Instrukciya-dlya-bota-vebkamstudii-06-03 \n"
+    " \n"
     f"Зарегистрируйтесь по идентификационному \n"
     f"номеру (id) который вы получили от своего администратора \n"
     f"и вы сможете отслеживать свой текущий невыплаченный баланс, \n"
@@ -35,13 +39,13 @@ def create_message_answer(report: tuple):
     {report[0]} {report[1]}
     Отчет по сайтам 
 
-    chaturbate: {report[2]} 
-    camsoda: {report[3]}
-    mfc: {report[4]}
-    stripchat: {report[5]}
-    jasmin: {report[6]}
-    streamate: {report[7]}
-    skyprivate: {report[8]}
+    chaturbate: {report[2]} tkns 
+    camsoda: {report[3]} tkns
+    mfc: {report[4]} tkns
+    stripchat: {report[5]} tkns
+    jasmin: {report[6]} $
+    streamate: {report[7]} $
+    skyprivate: {report[8]} tkns
     """
         
     return message_answer
