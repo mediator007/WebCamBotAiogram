@@ -32,7 +32,6 @@ from utils.functions import (
     )
 from utils.settings import dp, bot
 
-current_date = date.today()
 
 async def model_deals(message):
     """
@@ -155,7 +154,8 @@ async def report_sum(message, state):
     """
     Функция принимает сумму для записи в бд
     """
-
+    current_date = date.today()
+    
     markup = create_keyboard(available_work_buttons)
 
     report_sum = message.text
